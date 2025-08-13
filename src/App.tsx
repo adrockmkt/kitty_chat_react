@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import GatinhoAnimado from './components/GatinhoAnimado.tsx';
 import { ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
 
 const emojis = [
@@ -115,20 +116,25 @@ function App() {
           </button>
         </div>
 
-        {/* Comment textarea */}
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Deixe um comentário (opcional)..."
-          className="w-full h-24 resize-none border border-gray-200 rounded-xl p-3 text-sm mb-6 font-sans focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
-        />
+        {/* Comment textarea com GatinhoAnimado */}
+        <div className="flex items-start mb-6">
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Deixe um comentário (opcional)..."
+            className="flex-1 w-full h-24 resize-none border border-gray-200 rounded-xl p-3 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent"
+          />
+          <div>
+            <GatinhoAnimado className="w-[50px] h-[80px] pt-2" />
+          </div>
+        </div>
 
         {/* Submit button */}
         <button
           onClick={handleSubmit}
           className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-semibold text-base hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
         >
-          Enviar Feedback
+          Enviar feedback
         </button>
       </div>
     </div>
