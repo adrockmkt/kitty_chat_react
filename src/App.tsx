@@ -96,7 +96,7 @@ function App() {
       </button>
 
       {/* Painel de estatísticas */}
-      <div className="hidden lg:block w-80 p-6" style={{ paddingTop: '200px' }}>
+      <div className="hidden lg:block w-80 p-6" style={{ paddingTop: '300px' }}>
         <FeedbackStats />
       </div>
 
