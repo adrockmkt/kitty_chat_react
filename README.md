@@ -215,4 +215,4 @@ Este projeto é de uso livre para fins educacionais e demonstrativos.
 
 **Desenvolvido com ❤️ usando React + TypeScript + Supabase**
 
-*Última atualização: Janeiro 2025*
+*Última atualização: Setembro 2025*
