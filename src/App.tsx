@@ -96,7 +96,7 @@ function App() {
       </button>
 
       {/* Painel de estatísticas */}
-      <div className="hidden lg:block w-80 p-6">
+      <div className="hidden lg:block w-80 p-6 pt-20">
         <FeedbackStats />
       </div>
 

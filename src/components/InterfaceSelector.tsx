@@ -7,7 +7,7 @@ interface InterfaceSelectorProps {
 
 export default function InterfaceSelector({ isCompact, onToggle }: InterfaceSelectorProps) {
   return (
-    <div className="fixed top-4 left-4 z-50">
+    <div className="fixed top-4 left-4 z-50 lg:relative lg:top-0 lg:left-0 lg:mb-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2">
         <div className="flex gap-2">
           <button
