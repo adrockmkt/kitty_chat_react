@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import React from 'react';
 import GatinhoAnimado from './components/GatinhoAnimado.tsx';
 import FeedbackStats from './components/FeedbackStats';
 import CompactFeedback from './components/CompactFeedback';
