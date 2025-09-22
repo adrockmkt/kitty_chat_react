@@ -230,10 +230,10 @@ export default function CompactFeedback({ postId, onFeedbackSent }: CompactFeedb
       <div className="flex justify-end mb-2">
         <button
           onClick={() => setShowEmbed(!showEmbed)}
-          className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1"
+          className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Code size={12} />
-          Embed
+          📋 Embed
         </button>
       </div>
 
