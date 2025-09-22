@@ -97,12 +97,12 @@ function App() {
       </button>
 
       {/* Painel de estatísticas */}
-      <div className="hidden lg:block w-80 p-6" style={{ paddingTop: '300px' }}>
+      <div className="hidden lg:block fixed top-4 left-4 w-80 z-40">
         <FeedbackStats />
       </div>
 
       {/* Interface principal */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4" style={{ paddingLeft: '340px' }}>
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-8 text-center transition-colors duration-300">
         {/* Header */}
         <div className="mb-8">
