@@ -8,10 +8,11 @@ Um sistema completo de feedback em React + TypeScript + Tailwind que permite aos
 - **Carrossel de emojis interativo** com navegação horizontal infinita
 - **Emoji central destacado** com bolinha verde e escala aumentada
 - **Tooltip dinâmico** que aparece automaticamente quando cada emoji chega ao centro
-- **Campo de comentário opcional** com gatinho animado
+- **Campo de comentário opcional** para feedback detalhado
 - **Envio de feedback** com estados de loading e mensagens de confirmação
 - **Tema automático** baseado no horário (claro 6h-18h, escuro 18h-6h)
 - **Alternador manual de tema** com ícones sol/lua
+- **Gerador de código embed** para versão completa com botão dedicado
 
 ### Modo Compacto para Blogs
 - **Interface compacta** otimizada para integração em blogs e posts
@@ -123,11 +124,21 @@ npm run build
 
 ### Para Blogueiros (Código Embed)
 
+O sistema oferece duas versões de código embed:
+
+#### Versão Compacta
 1. **Acesse o sistema**: Vá para o modo "Blog" usando o seletor
 2. **Clique em "📋 Embed"**: Botão no canto superior direito do widget
 3. **Copie o código**: Clique em "Copiar código" no modal
 4. **Cole no seu blog**: Insira o código HTML em qualquer post ou página
-5. **Funciona automaticamente**: O widget detecta tema e salva no banco
+
+#### Versão Completa
+1. **Use a interface completa**: Mantenha o modo padrão
+2. **Clique no botão de código**: Ícone de código no canto superior direito
+3. **Copie o código**: Clique em "Copiar código" no modal
+4. **Cole no seu blog**: Insira o código HTML onde desejar
+
+Ambas as versões funcionam automaticamente, detectam tema e salvam feedbacks no banco de dados.
 
 #### Exemplo de uso do código embed:
 ```html
@@ -139,7 +150,21 @@ npm run build
 </script>
 ```
 
-#### Características do widget embed:
+#### Diferenças entre as versões:
+
+**Versão Compacta:**
+- 5 emojis essenciais
+- Interface minimalista
+- Ideal para sidebars e rodapés
+- Avaliação rápida com um clique
+
+**Versão Completa:**
+- 8 emojis com carrossel interativo
+- Campo de comentários
+- Interface mais rica e detalhada
+- Ideal para páginas dedicadas de feedback
+
+#### Características dos widgets embed:
 - ✅ **Tema automático**: Detecta preferência dark/light do usuário
 - ✅ **Responsivo**: Funciona em desktop e mobile
 - ✅ **Independente**: Não precisa de bibliotecas externas
@@ -155,6 +180,7 @@ npm run build
 4. **Enviar feedback**: Clique em "Enviar feedback" para salvar no banco
 5. **Ver estatísticas**: Observe o painel lateral com dados em tempo real
 6. **Alternar tema**: Use o botão sol/lua no canto superior direito
+7. **Gerar código embed**: Clique no botão de código no canto superior direito para obter o código HTML da versão completa
 
 ### Modo Compacto
 1. **Alternar interface**: Use o seletor no canto superior esquerdo
@@ -176,12 +202,12 @@ npm run build
 ## 🎨 Componentes Principais
 
 - **`App.tsx`** - Componente principal com carrossel e formulário
-- **`CompactFeedback.tsx`** - Interface compacta para blogs
-  - Inclui gerador de código embed
-  - Modal com código HTML completo
+- **`CompactFeedback.tsx`** - Interface compacta para blogs com gerador de embed
+- **`EmbedModal.tsx`** - Modal reutilizável para gerar código embed (versão completa e compacta)
+  - Gera código HTML completo
   - Funcionalidade de copiar para clipboard
+  - Suporte a temas automáticos
 - **`InterfaceSelector.tsx`** - Seletor entre modo completo e compacto
-- **`GatinhoAnimado.tsx`** - Animação do gatinho com rotação de GIFs
 - **`FeedbackStats.tsx`** - Painel de estatísticas em tempo real
 - **`feedbackService.ts`** - Serviços para comunicação com Supabase
 - **`supabase.ts`** - Configuração do cliente Supabase
@@ -276,4 +302,4 @@ Este projeto é de uso livre para fins educacionais e demonstrativos.
 
 **Desenvolvido com ❤️ usando React + TypeScript + Supabase**
 
-*Última atualização: Setembro 2025*
+*Última atualização: Dezembro 2024*

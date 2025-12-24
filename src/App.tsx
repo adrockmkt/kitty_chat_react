@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
-import GatinhoAnimado from './components/GatinhoAnimado.tsx';
 import FeedbackStats from './components/FeedbackStats';
 import CompactFeedback from './components/CompactFeedback';
 import InterfaceSelector from './components/InterfaceSelector';
-import { ChevronLeft, ChevronRight, MessageSquare, Sun, Moon } from 'lucide-react';
+import EmbedModal from './components/EmbedModal';
+import { ChevronLeft, ChevronRight, MessageSquare, Sun, Moon, Code } from 'lucide-react';
 import { submitFeedback } from './services/feedbackService';
 import { useTheme } from './hooks/useTheme';
 
@@ -26,6 +26,7 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [isCompact, setIsCompact] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
   const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -88,13 +89,26 @@ function App() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 flex">
       <InterfaceSelector isCompact={isCompact} onToggle={setIsCompact} />
       
-      {/* Botão de tema */}
-      <button
-        onClick={toggleTheme}
-        className="fixed top-4 right-4 z-50 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all"
-      >
-        {isDark ? <Sun size={20} /> : <Moon size={20} />}
-      </button>
+      {/* Botões de tema e embed */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <button
+          onClick={() => setShowEmbed(true)}
+          className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all"
+          title="Código embed"
+        >
+          <Code size={20} />
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all"
+          title="Alternar tema"
+        >
+          {isDark ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+
+      {/* Modal de embed */}
+      <EmbedModal isOpen={showEmbed} onClose={() => setShowEmbed(false)} mode="full" />
 
       {/* Painel de estatísticas */}
       <div className="hidden lg:block fixed top-4 left-4 w-80 z-40">
@@ -190,18 +204,15 @@ function App() {
           </div>
         )}
 
-        {/* Comment textarea com GatinhoAnimado */}
-        <div className="flex items-start mb-6">
+        {/* Comment textarea */}
+        <div className="mb-6">
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             disabled={isSubmitting}
             placeholder="Deixe um comentário (opcional)..."
-            className="flex-1 w-full h-24 resize-none border border-gray-200 dark:border-gray-600 rounded-xl p-3 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300 disabled:opacity-50"
+            className="w-full h-24 resize-none border border-gray-200 dark:border-gray-600 rounded-xl p-3 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300 disabled:opacity-50"
           />
-          <div>
-            <GatinhoAnimado className="w-[50px] h-[80px] pt-2" />
-          </div>
         </div>
 
         {/* Submit button */}
