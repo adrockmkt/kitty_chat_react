@@ -219,7 +219,12 @@ function App() {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-semibold text-base hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: 'rgb(232, 0, 0)',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(200, 0, 0)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(232, 0, 0)'}
         >
           {isSubmitting ? 'Enviando...' : 'Enviar feedback'}
         </button>
