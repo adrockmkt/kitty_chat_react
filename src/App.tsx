@@ -7,6 +7,7 @@ import EmbedModal from './components/EmbedModal';
 import { ChevronLeft, ChevronRight, MessageSquare, Sun, Moon, Code } from 'lucide-react';
 import { submitFeedback } from './services/feedbackService';
 import { useTheme } from './hooks/useTheme';
+import { useHeartbeat } from './hooks/useHeartbeat';
 
 const emojis = [
   { emoji: '😭', tooltip: 'Extremamente insatisfeito' },
@@ -28,6 +29,8 @@ function App() {
   const [isCompact, setIsCompact] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+
+  useHeartbeat();
 
   useEffect(() => {
     // Mostra o tooltip por 3 segundos quando muda o emoji
