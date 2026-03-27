@@ -10,8 +10,7 @@ Um sistema completo de feedback em React + TypeScript + Tailwind que permite aos
 - **Tooltip dinâmico** que aparece automaticamente quando cada emoji chega ao centro
 - **Campo de comentário opcional** para feedback detalhado
 - **Envio de feedback** com estados de loading e mensagens de confirmação
-- **Tema automático** baseado no horário (claro 6h-18h, escuro 18h-6h)
-- **Alternador manual de tema** com ícones sol/lua
+- **Tema escuro permanente** para melhor integração com blogs
 - **Gerador de código embed** para versão completa com botão dedicado
 
 ### Modo Compacto para Blogs
@@ -22,7 +21,7 @@ Um sistema completo de feedback em React + TypeScript + Tailwind que permite aos
 - **Seletor de interface** para alternar entre modo completo e compacto
 - **Gerador de código embed** com botão dedicado para copiar código HTML
 - **Widget independente** que funciona em qualquer blog sem dependências
-- **Tema automático** baseado nas preferências do sistema do usuário
+- **Tema escuro permanente** para consistência visual
 - **Comunicação direta com Supabase** mantida no código embed
 
 ### Sistema de Dados
@@ -165,7 +164,7 @@ Ambas as versões funcionam automaticamente, detectam tema e salvam feedbacks no
 - Ideal para páginas dedicadas de feedback
 
 #### Características dos widgets embed:
-- ✅ **Tema automático**: Detecta preferência dark/light do usuário
+- ✅ **Tema escuro**: Interface visual consistente em qualquer ambiente
 - ✅ **Responsivo**: Funciona em desktop e mobile
 - ✅ **Independente**: Não precisa de bibliotecas externas
 - ✅ **Seguro**: Conexão direta com Supabase mantida
@@ -179,8 +178,7 @@ Ambas as versões funcionam automaticamente, detectam tema e salvam feedbacks no
 3. **Adicionar comentário**: Digite um comentário opcional na área de texto
 4. **Enviar feedback**: Clique em "Enviar feedback" para salvar no banco
 5. **Ver estatísticas**: Observe o painel lateral com dados em tempo real
-6. **Alternar tema**: Use o botão sol/lua no canto superior direito
-7. **Gerar código embed**: Clique no botão de código no canto superior direito para obter o código HTML da versão completa
+6. **Gerar código embed**: Clique no botão de código no canto superior direito para obter o código HTML da versão completa
 
 ### Modo Compacto
 1. **Alternar interface**: Use o seletor no canto superior esquerdo
@@ -215,10 +213,10 @@ Ambas as versões funcionam automaticamente, detectam tema e salvam feedbacks no
 
 ## 🌙 Sistema de Temas
 
-- **Detecção automática**: Tema escuro das 18h às 6h, claro das 6h às 18h
-- **Alternador manual**: Botão sol/lua para override manual
-- **Transições suaves**: Animações de 300ms entre temas
-- **Persistência visual**: Cores adaptadas para ambos os modos
+- **Tema escuro permanente**: Interface sempre em modo noturno
+- **Compatibilidade visual**: Cores otimizadas para tema escuro
+- **Transições suaves**: Animações de 300ms para mudanças visuais
+- **Design minimalista**: Interface limpa e focada no conteúdo
 
 ## 🔧 Scripts Disponíveis
 
@@ -279,11 +277,11 @@ O sistema foi projetado para funcionar em **qualquer ambiente**:
 ### Sistema Principal
 - Interface completa com estatísticas
 - Painel administrativo
-- Tema automático baseado no horário
+- Tema escuro permanente
 
 ### Widget para Blogs
 - Código HTML independente
-- Tema baseado nas preferências do usuário
+- Tema escuro para consistência visual
 - Funciona sem dependências externas
 - Mantém conexão com banco de dados central
 
