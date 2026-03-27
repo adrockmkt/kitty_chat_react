@@ -4,7 +4,7 @@ import FeedbackStats from './components/FeedbackStats';
 import CompactFeedback from './components/CompactFeedback';
 import InterfaceSelector from './components/InterfaceSelector';
 import EmbedModal from './components/EmbedModal';
-import { ChevronLeft, ChevronRight, MessageSquare, Sun, Moon, Code } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageSquare, Code } from 'lucide-react';
 import { submitFeedback } from './services/feedbackService';
 import { useTheme } from './hooks/useTheme';
 import { useHeartbeat } from './hooks/useHeartbeat';
@@ -28,7 +28,7 @@ function App() {
   const [message, setMessage] = useState('');
   const [isCompact, setIsCompact] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
+  useTheme();
 
   useHeartbeat();
 
@@ -92,21 +92,14 @@ function App() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 flex">
       <InterfaceSelector isCompact={isCompact} onToggle={setIsCompact} />
       
-      {/* Botões de tema e embed */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2">
+      {/* Botão de embed */}
+      <div className="fixed top-4 right-4 z-50">
         <button
           onClick={() => setShowEmbed(true)}
-          className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all"
+          className="p-3 bg-gray-800 rounded-full shadow-lg border border-gray-700 text-gray-400 hover:text-gray-100 transition-all"
           title="Código embed"
         >
           <Code size={20} />
-        </button>
-        <button
-          onClick={toggleTheme}
-          className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-all"
-          title="Alternar tema"
-        >
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </div>
 
