@@ -22,24 +22,17 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
 (function() {
   const styles = \`
     .kitty-feedback-compact {
-      background: white;
+      background: #1f2937;
       border-radius: 8px;
       padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      border: 1px solid #374151;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       max-width: 400px;
       margin: 20px auto;
+      color: white;
     }
-    @media (prefers-color-scheme: dark) {
-      .kitty-feedback-compact {
-        background: #1f2937;
-        border-color: #374151;
-        color: white;
-      }
-      .kitty-feedback-compact p { color: #d1d5db; }
-      .kitty-feedback-compact button:hover { background: #374151 !important; }
-    }
+    .kitty-feedback-compact p { color: #d1d5db; }
     .kitty-feedback-compact p {
       text-align: center;
       margin-bottom: 12px;
@@ -67,7 +60,7 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
     }
     .kitty-feedback-emoji:hover {
       transform: scale(1.1);
-      background: #f3f4f6;
+      background: #374151;
     }
     .kitty-feedback-emoji.selected {
       background: #dcfce7;
@@ -76,7 +69,7 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
     .kitty-feedback-message {
       text-align: center;
       font-size: 14px;
-      color: #6b7280;
+      color: #d1d5db;
     }
   \`;
 
@@ -170,28 +163,23 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
 (function() {
   const styles = \`
     .kitty-feedback-full {
-      background: white;
+      background: #1f2937;
       border-radius: 24px;
       padding: 32px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       max-width: 500px;
       margin: 40px auto;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: white;
     }
-    @media (prefers-color-scheme: dark) {
-      .kitty-feedback-full {
-        background: #1f2937;
-        color: white;
-      }
-      .kitty-feedback-full h3 { color: white; }
-      .kitty-feedback-full p { color: #d1d5db; }
-      .kitty-feedback-full textarea {
-        background: #374151;
-        border-color: #4b5563;
-        color: white;
-      }
-      .kitty-feedback-full textarea::placeholder { color: #9ca3af; }
+    .kitty-feedback-full h3 { color: white; }
+    .kitty-feedback-full p { color: #d1d5db; }
+    .kitty-feedback-full textarea {
+      background: #374151;
+      border-color: #4b5563;
+      color: white;
     }
+    .kitty-feedback-full textarea::placeholder { color: #9ca3af; }
     .kitty-feedback-header {
       text-align: center;
       margin-bottom: 32px;
@@ -199,7 +187,7 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
     .kitty-feedback-icon {
       width: 48px;
       height: 48px;
-      background: black;
+      background: #374151;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -207,12 +195,6 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
       margin: 0 auto 16px;
       color: white;
       font-size: 20px;
-    }
-    @media (prefers-color-scheme: dark) {
-      .kitty-feedback-icon {
-        background: white;
-        color: black;
-      }
     }
     .kitty-feedback-full h3 {
       font-size: 24px;
@@ -282,19 +264,13 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
       top: -48px;
       left: 50%;
       transform: translateX(-50%);
-      background: #1f2937;
-      color: white;
+      background: #e5e7eb;
+      color: #1f2937;
       padding: 4px 12px;
       border-radius: 8px;
       font-size: 12px;
       white-space: nowrap;
       z-index: 20;
-    }
-    @media (prefers-color-scheme: dark) {
-      .kitty-tooltip {
-        background: #e5e7eb;
-        color: #1f2937;
-      }
     }
     .kitty-tooltip::after {
       content: '';
@@ -303,17 +279,12 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
       left: 50%;
       transform: translateX(-50%);
       border: 4px solid transparent;
-      border-top-color: #1f2937;
-    }
-    @media (prefers-color-scheme: dark) {
-      .kitty-tooltip::after {
-        border-top-color: #e5e7eb;
-      }
+      border-top-color: #e5e7eb;
     }
     .kitty-feedback-full textarea {
       width: 100%;
       height: 96px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #4b5563;
       border-radius: 12px;
       padding: 12px;
       font-size: 14px;
@@ -348,19 +319,13 @@ export default function EmbedModal({ isOpen, onClose, mode }: EmbedModalProps) {
       cursor: not-allowed;
     }
     .kitty-message {
-      background: #f3f4f6;
+      background: #374151;
       padding: 12px;
       border-radius: 8px;
       margin-bottom: 24px;
       text-align: center;
       font-size: 14px;
-      color: #374151;
-    }
-    @media (prefers-color-scheme: dark) {
-      .kitty-message {
-        background: #374151;
-        color: #d1d5db;
-      }
+      color: #d1d5db;
     }
   \`;
 
