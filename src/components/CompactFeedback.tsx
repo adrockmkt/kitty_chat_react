@@ -33,33 +33,21 @@ export default function CompactFeedback({ postId, onFeedbackSent }: CompactFeedb
   // CSS Styles
   const styles = \`
     .kitty-feedback {
-      background: white;
+      background: #1f2937;
       border-radius: 8px;
       padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      border: 1px solid #374151;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       max-width: 400px;
       margin: 20px auto;
-    }
-    @media (prefers-color-scheme: dark) {
-      .kitty-feedback {
-        background: #1f2937;
-        border-color: #374151;
-        color: white;
-      }
-      .kitty-feedback p {
-        color: #d1d5db;
-      }
-      .kitty-feedback button:hover {
-        background: #374151 !important;
-      }
+      color: white;
     }
     .kitty-feedback p {
       text-align: center;
       margin-bottom: 12px;
       font-size: 14px;
-      color: #6b7280;
+      color: #d1d5db;
     }
     .kitty-feedback-emojis {
       display: flex;
@@ -82,7 +70,7 @@ export default function CompactFeedback({ postId, onFeedbackSent }: CompactFeedb
     }
     .kitty-feedback-emoji:hover {
       transform: scale(1.1);
-      background: #f3f4f6;
+      background: #374151;
     }
     .kitty-feedback-emoji.selected {
       background: #dcfce7;
@@ -91,7 +79,7 @@ export default function CompactFeedback({ postId, onFeedbackSent }: CompactFeedb
     .kitty-feedback-message {
       text-align: center;
       font-size: 14px;
-      color: #6b7280;
+      color: #d1d5db;
     }
   \`;
   
