@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(circle at top, #fff2e8 0%, #fff8f4 28%, #f8fafc 100%);
+    color: #0f172a;
+    transition:
+      background 200ms ease,
+      color 200ms ease;
+  }
+
+  html.dark body {
+    background:
+      radial-gradient(circle at top, #111827 0%, #020617 52%, #020617 100%);
+    color: #f8fafc;
+  }
+}
