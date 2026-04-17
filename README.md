@@ -1,303 +1,339 @@
-# Kitty Chat React - Sistema de Feedback com Emojis
+# Kitty Chat
 
-Um sistema completo de feedback em React + TypeScript + Tailwind que permite aos usuários avaliar sua experiência através de um carrossel interativo de emojis, com persistência de dados em tempo real e modo compacto para blogs.
+Widget de reacoes para blog com painel privado de estatisticas.
 
-## 🎯 Funcionalidades
+Este projeto deixa de ser um sistema de feedback geral com duas interfaces e passa a ter um foco unico: registrar reacoes dos leitores nos posts do blog e consolidar tudo em um painel administrativo privado hospedado no proprio servidor da DigitalOcean, sem dependencia de Supabase.
 
-### Interface Principal
-- **Carrossel de emojis interativo** com navegação horizontal infinita
-- **Emoji central destacado** com bolinha verde e escala aumentada
-- **Tooltip dinâmico** que aparece automaticamente quando cada emoji chega ao centro
-- **Campo de comentário opcional** para feedback detalhado
-- **Envio de feedback** com estados de loading e mensagens de confirmação
-- **Tema escuro permanente** para melhor integração com blogs
-- **Gerador de código embed** para versão completa com botão dedicado
+## Objetivo
 
-### Modo Compacto para Blogs
-- **Interface compacta** otimizada para integração em blogs e posts
-- **5 emojis essenciais** para avaliação rápida
-- **Feedback instantâneo** com um clique
-- **Identificação por post** com campo `post_id` opcional
-- **Seletor de interface** para alternar entre modo completo e compacto
-- **Gerador de código embed** com botão dedicado para copiar código HTML
-- **Widget independente** que funciona em qualquer blog sem dependências
-- **Tema escuro permanente** para consistência visual
-- **Comunicação direta com Supabase** mantida no código embed
+- Manter o widget visual do blog como ja esta hoje.
+- Remover completamente a dependencia de Supabase.
+- Registrar reacoes em infraestrutura propria.
+- Identificar em qual post cada reacao aconteceu.
+- Exibir estatisticas totais e por URL em uma unica tela privada.
+- Criar ranking de posts por volume e por sentimento.
 
-### Sistema de Dados
-- **Persistência em Supabase** - todos os feedbacks são salvos no banco de dados
-- **Estatísticas em tempo real** - painel lateral com gráficos dos feedbacks recebidos
-- **Validação de dados** com tratamento de erros
-- **Estados de loading** durante operações assíncronas
-- **Políticas RLS** para segurança dos dados
+## Escopo Atual do Produto
 
-### Experiência do Usuário
-- **Design responsivo** adaptado para desktop e mobile
-- **Animações suaves** com transições de 300ms
-- **Feedback visual** claro para sucesso e erro
-- **Auto-limpeza** do formulário após envio bem-sucedido
-- **Loop infinito** no carrossel sem travamentos
-- **Modo escuro/claro** com transições suaves
+O produto passa a ter apenas dois blocos:
 
-## 🎨 Emojis Disponíveis
+1. Widget publico de reacoes para o blog.
+2. Painel privado de estatisticas com login e senha.
 
-### Modo Completo (8 emojis)
-| Emoji | Sentimento | Descrição |
-|-------|------------|-----------|
-| 😭 | Extremamente insatisfeito | Experiência muito negativa |
-| 😢 | Muito insatisfeito | Experiência ruim |
-| 😕 | Insatisfeito | Experiência abaixo do esperado |
-| 😐 | Neutro | Experiência mediana |
-| 🙂 | Satisfeito | Experiência boa |
-| 😊 | Muito satisfeito | Experiência muito boa |
-| 🤩 | Encantado | Experiência excelente |
-| 🔥 | Entusiasmado | Experiência excepcional |
+Itens fora do novo escopo:
 
-### Modo Compacto (5 emojis)
-| Emoji | Sentimento | Descrição |
-|-------|------------|-----------|
-| 😭 | Muito ruim | Experiência negativa |
-| 😕 | Ruim | Experiência ruim |
-| 😐 | Ok | Experiência mediana |
-| 😊 | Bom | Experiência boa |
-| 🤩 | Excelente | Experiência excelente |
+- Interface completa antiga com carrossel.
+- Campo de comentario.
+- Dashboard publico.
+- Heartbeat via Supabase Function.
+- Cliente e servicos ligados ao Supabase.
 
-## 🛠️ Tecnologias
+## Requisitos Funcionais
 
-- **[React 18](https://reactjs.org/)** - Biblioteca principal
-- **[Vite](https://vitejs.dev/)** - Build tool e dev server
-- **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática
-- **[Tailwind CSS](https://tailwindcss.com/)** - Framework CSS utilitário
-- **[Supabase](https://supabase.com/)** - Backend as a Service (banco de dados)
-- **[Lucide React](https://lucide.dev/)** - Ícones SVG
+### Widget do blog
 
-## 🗄️ Estrutura do Banco de Dados
+- Preservar o layout atual do widget ja publicado no blog.
+- Exibir apenas os 5 emojis da versao blog.
+- Permitir registrar a reacao com um clique.
+- Exibir mensagem visual de confirmacao apos o envio.
+- Funcionar em qualquer post do blog via embed ou inclusao no front atual.
+- Enviar os dados para uma API propria hospedada na DigitalOcean.
 
-```sql
-CREATE TABLE feedback (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  emoji text NOT NULL,
-  emotion text NOT NULL,
-  comment text,
-  post_id text,
-  created_at timestamptz DEFAULT now()
-);
+### Identificacao do post
 
--- Políticas RLS
-ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+Cada reacao precisa carregar contexto suficiente para analise posterior:
 
-CREATE POLICY "Allow public insert access to feedback"
-  ON feedback FOR INSERT
-  TO public
-  WITH CHECK (true);
+- `post_url`: URL completa da pagina.
+- `post_path`: caminho da pagina para agrupamento.
+- `post_title`: titulo do documento, quando disponivel.
+- `post_id`: opcional, caso no futuro o blog queira enviar um identificador proprio.
 
-CREATE POLICY "Allow public read access to feedback"
-  ON feedback FOR SELECT
-  TO public
-  USING (true);
+### Analise por reacao
+
+Cada emoji representa uma classificacao de sentimento fixa:
+
+| Emoji | Rotulo | Score |
+| --- | --- | --- |
+| `😭` | muito ruim | `-2` |
+| `😕` | ruim | `-1` |
+| `😐` | ok | `0` |
+| `😊` | bom | `1` |
+| `🤩` | excelente | `2` |
+
+Esse mapeamento permite:
+
+- score medio geral do blog
+- score medio por post
+- distribuicao total por emoji
+- comparacao entre posts melhores e piores avaliados
+
+### Painel administrativo
+
+O painel privado deve ficar em:
+
+- `https://mobiledelivery.com.br/kitty-chat`
+
+O acesso deve ser protegido por login e senha.
+
+### Tela unica de estatisticas
+
+O painel deve consolidar em uma unica tela:
+
+- total de reacoes
+- distribuicao por emoji
+- score medio de sentimento
+- serie temporal de reacoes
+- ranking de posts com mais reacoes
+- ranking de posts com melhor sentimento medio
+- ranking de posts com pior sentimento medio
+- filtro e busca por URL ou path
+- detalhe por post com contagem por emoji
+- resumo de sentimento por URL especifica
+
+## Arquitetura Proposta
+
+### Frontend
+
+- Manter a base em `React + TypeScript + Vite`.
+- Simplificar a aplicacao para trabalhar apenas com o modo blog e o painel admin.
+
+### Backend
+
+Recomendacao inicial:
+
+- `Node.js + Express`
+
+Motivos:
+
+- simples de manter
+- rapido para colocar em producao
+- combina com o stack atual do projeto
+- suficiente para um volume leve a moderado de reacoes
+
+### Banco de dados
+
+Recomendacao inicial:
+
+- `SQLite`
+
+Motivos:
+
+- elimina servico externo
+- facil de fazer backup
+- baixo custo operacional
+- suficiente para o caso de uso atual
+
+## Modelo de Dados Inicial
+
+### Tabela `reactions`
+
+Campos sugeridos:
+
+- `id`
+- `post_url`
+- `post_path`
+- `post_title`
+- `post_id`
+- `emoji`
+- `emotion_label`
+- `sentiment_score`
+- `created_at`
+- `ip_hash`
+- `user_agent`
+
+### Tabela `admin_users`
+
+Campos sugeridos:
+
+- `id`
+- `username`
+- `password_hash`
+- `created_at`
+
+## Endpoints Minimos
+
+### Publicos
+
+- `POST /api/reactions`
+
+Payload esperado:
+
+```json
+{
+  "emoji": "😊",
+  "emotionLabel": "bom",
+  "sentimentScore": 1,
+  "postUrl": "https://mobiledelivery.com.br/post/exemplo",
+  "postPath": "/post/exemplo",
+  "postTitle": "Titulo do post",
+  "postId": "opcional"
+}
 ```
 
-## 📦 Instalação e Configuração
+### Privados
 
-### Para Desenvolvedores
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/stats/overview`
+- `GET /api/stats/posts`
+- `GET /api/stats/post?url=...`
 
-### 1. Instalar dependências
-```bash
-npm install
+## Requisitos de Seguranca
+
+- Senha armazenada apenas com hash seguro.
+- Sessao autenticada para o painel admin.
+- Rate limit basico no endpoint de reacoes.
+- Cooldown curto por IP e por post para reduzir spam.
+- Hash do IP em vez de armazenar IP puro, quando possivel.
+
+## Fluxos Principais
+
+### Fluxo do leitor
+
+1. O leitor abre um post.
+2. O widget exibe os 5 emojis.
+3. O leitor clica em uma reacao.
+4. O frontend envia a reacao para a API propria.
+5. A API grava no SQLite com os metadados do post.
+6. O widget exibe confirmacao visual.
+
+### Fluxo do administrador
+
+1. O administrador acessa `https://mobiledelivery.com.br/kitty-chat`.
+2. Faz login com usuario e senha.
+3. Visualiza a tela unica de estatisticas.
+4. Filtra por post, URL ou periodo.
+5. Analisa ranking, volume e sentimento.
+
+## Estrategia de Migracao
+
+### Fase 1
+
+- Manter o widget atual.
+- Criar API propria.
+- Criar banco SQLite.
+- Trocar o envio de reacoes do Supabase para a nova API.
+
+### Fase 2
+
+- Implementar login admin.
+- Criar dashboard privado.
+- Exibir totais, rankings e analise por URL.
+
+### Fase 3
+
+- Remover codigo legado da interface completa.
+- Remover dependencias e arquivos do Supabase.
+- Atualizar deploy e documentacao operacional.
+
+## Plano Tecnico de Implementacao
+
+### Etapa 1. Preparacao do projeto
+
+- revisar a estrutura atual e separar o que e widget blog do que e legado
+- remover do fluxo principal a interface completa
+- mapear todos os pontos que hoje dependem de `supabase`
+
+### Etapa 2. Backend proprio
+
+- criar uma pasta de servidor no projeto
+- instalar `express`, `sqlite` ou biblioteca equivalente, middleware de auth e seguranca
+- criar rotas de reacoes e estatisticas
+- criar inicializacao automatica do banco
+
+### Etapa 3. Persistencia
+
+- criar schema do banco SQLite
+- implementar insercao de reacoes
+- implementar agregacoes para overview, ranking e detalhe por post
+
+### Etapa 4. Integracao do widget
+
+- manter o visual atual do widget
+- trocar o `submitFeedback` para usar a nova API
+- capturar `window.location.href`, `pathname` e `document.title`
+- manter mensagem de sucesso e erro no frontend
+
+### Etapa 5. Autenticacao admin
+
+- criar usuario admin inicial
+- implementar login com senha hasheada
+- proteger os endpoints privados
+- proteger a rota do painel
+
+### Etapa 6. Dashboard
+
+- criar uma unica tela administrativa
+- exibir cards de resumo
+- exibir tabela ou ranking de posts
+- exibir analise por emoji e sentimento
+- permitir filtro por URL/post
+
+### Etapa 7. Deploy
+
+- adaptar o servidor da DigitalOcean para servir frontend e API
+- decidir entre processo unico Node ou frontend estatico + backend Node separado
+- configurar variaveis de ambiente
+- configurar rotina simples de backup do arquivo SQLite
+
+### Etapa 8. Limpeza final
+
+- remover `src/lib/supabase.ts`
+- remover servicos e embeds que falam com Supabase
+- remover `supabase/functions` e migracoes antigas, quando a migracao estiver concluida
+- atualizar comandos de deploy e operacao
+
+## Estrutura Esperada apos a Migracao
+
+Exemplo de organizacao desejada:
+
+```text
+kitty_chat/
+  src/
+    admin/
+    components/
+    services/
+  server/
+    db/
+    routes/
+    middleware/
+    services/
+  data/
+    kitty-chat.sqlite
 ```
 
-### 2. Configurar Supabase
-1. Clique no botão **"Connect to Supabase"** no topo direito da interface
-2. Configure seu projeto Supabase
-3. As variáveis de ambiente serão configuradas automaticamente no arquivo `.env`
+## Riscos e Cuidados
 
-### 3. Executar o projeto
+- `SQLite` atende bem o caso atual, mas precisa backup recorrente.
+- Sem protecao minima, o endpoint publico pode sofrer spam.
+- O deploy atual parece orientado a front estatico, entao sera preciso acomodar uma API no servidor.
+- A remocao do Supabase deve acontecer so depois que a nova persistencia estiver validada ponta a ponta.
+
+## Criterios de Aceite
+
+- O widget visual continua funcionando no blog sem regressao visual relevante.
+- Nenhuma reacao depende de Supabase.
+- Cada reacao fica vinculada ao post correto.
+- O painel privado exige login.
+- O painel mostra estatisticas totais e por URL.
+- O painel mostra ranking por volume e por sentimento.
+- O sistema roda no servidor da DigitalOcean com banco proprio.
+
+## Scripts Atuais
+
 ```bash
 npm run dev
-```
-
-### 4. Build para produção
-```bash
 npm run build
+npm run preview
+npm run lint
 ```
 
-### Para Blogueiros (Código Embed)
+## Proximo Passo
 
-O sistema oferece duas versões de código embed:
+Implementar a migracao do projeto para:
 
-#### Versão Compacta
-1. **Acesse o sistema**: Vá para o modo "Blog" usando o seletor
-2. **Clique em "📋 Embed"**: Botão no canto superior direito do widget
-3. **Copie o código**: Clique em "Copiar código" no modal
-4. **Cole no seu blog**: Insira o código HTML em qualquer post ou página
-
-#### Versão Completa
-1. **Use a interface completa**: Mantenha o modo padrão
-2. **Clique no botão de código**: Ícone de código no canto superior direito
-3. **Copie o código**: Clique em "Copiar código" no modal
-4. **Cole no seu blog**: Insira o código HTML onde desejar
-
-Ambas as versões funcionam automaticamente, detectam tema e salvam feedbacks no banco de dados.
-
-#### Exemplo de uso do código embed:
-```html
-<!-- Cole este código onde quiser o widget de feedback -->
-<div id="kitty-feedback-widget"></div>
-<script>
-// Código gerado automaticamente pelo sistema
-// Inclui CSS, JavaScript e conexão com Supabase
-</script>
-```
-
-#### Diferenças entre as versões:
-
-**Versão Compacta:**
-- 5 emojis essenciais
-- Interface minimalista
-- Ideal para sidebars e rodapés
-- Avaliação rápida com um clique
-
-**Versão Completa:**
-- 8 emojis com carrossel interativo
-- Campo de comentários
-- Interface mais rica e detalhada
-- Ideal para páginas dedicadas de feedback
-
-#### Características dos widgets embed:
-- ✅ **Tema escuro**: Interface visual consistente em qualquer ambiente
-- ✅ **Responsivo**: Funciona em desktop e mobile
-- ✅ **Independente**: Não precisa de bibliotecas externas
-- ✅ **Seguro**: Conexão direta com Supabase mantida
-- ✅ **Identificação**: Usa URL da página como identificador do post
-
-## 🎮 Como Usar
-
-### Modo Completo
-1. **Navegar pelos emojis**: Use as setas laterais ou clique nos emojis
-2. **Ver tooltip**: Cada emoji mostra automaticamente sua descrição quando centralizado
-3. **Adicionar comentário**: Digite um comentário opcional na área de texto
-4. **Enviar feedback**: Clique em "Enviar feedback" para salvar no banco
-5. **Ver estatísticas**: Observe o painel lateral com dados em tempo real
-6. **Gerar código embed**: Clique no botão de código no canto superior direito para obter o código HTML da versão completa
-
-### Modo Compacto
-1. **Alternar interface**: Use o seletor no canto superior esquerdo
-2. **Avaliação rápida**: Clique diretamente no emoji desejado
-3. **Feedback instantâneo**: Receba confirmação imediata do envio
-4. **Integração em blogs**: Ideal para avaliar posts específicos
-5. **Gerar código embed**: Clique no botão "📋 Embed" para obter código HTML
-6. **Copiar e colar**: Cole o código gerado em qualquer blog ou site
-7. **Funcionamento automático**: O widget funciona independentemente com tema automático
-
-## 📊 Funcionalidades do Dashboard
-
-- **Contadores em tempo real** de cada tipo de emoção
-- **Barras de progresso visuais** mostrando distribuição percentual
-- **Total de feedbacks** recebidos
-- **Atualização automática** quando novos feedbacks são enviados
-- **Ordenação por popularidade** (mais votados primeiro)
-
-## 🎨 Componentes Principais
-
-- **`App.tsx`** - Componente principal com carrossel e formulário
-- **`CompactFeedback.tsx`** - Interface compacta para blogs com gerador de embed
-- **`EmbedModal.tsx`** - Modal reutilizável para gerar código embed (versão completa e compacta)
-  - Gera código HTML completo
-  - Funcionalidade de copiar para clipboard
-  - Suporte a temas automáticos
-- **`InterfaceSelector.tsx`** - Seletor entre modo completo e compacto
-- **`FeedbackStats.tsx`** - Painel de estatísticas em tempo real
-- **`feedbackService.ts`** - Serviços para comunicação com Supabase
-- **`supabase.ts`** - Configuração do cliente Supabase
-- **`useTheme.ts`** - Hook para gerenciamento de tema
-
-## 🌙 Sistema de Temas
-
-- **Tema escuro permanente**: Interface sempre em modo noturno
-- **Compatibilidade visual**: Cores otimizadas para tema escuro
-- **Transições suaves**: Animações de 300ms para mudanças visuais
-- **Design minimalista**: Interface limpa e focada no conteúdo
-
-## 🔧 Scripts Disponíveis
-
-```bash
-npm run dev      # Servidor de desenvolvimento
-npm run build    # Build para produção
-npm run preview  # Preview da build
-npm run lint     # Verificação de código
-```
-
-## 🚀 Deploy
-
-### Build Local + Upload
-```bash
-# 1. Fazer build
-npm run build
-
-# 2. Enviar para servidor
-rsync -avz . root@147.182.183.10:/home/adrock/kitty-chat/
-```
-
-### Configuração no Servidor
-```bash
-# Instalar dependências
-npm install
-
-# Servir arquivos estáticos
-npm install -g serve
-serve -s dist -l 3000 -H 0.0.0.0
-```
-
-## 🌐 URLs de Acesso
-
-- **Desenvolvimento local**: `http://localhost:5173`
-- **Servidor produção**: `http://147.182.183.10:3000`
-- **Com domínio**: `http://mobiledelivery.com.br:3000`
-
-## 📱 Responsividade
-
-- **Desktop**: Interface completa com painel lateral de estatísticas
-- **Tablet**: Layout adaptado sem perda de funcionalidades
-- **Mobile**: Interface otimizada para toque, estatísticas em modal
-- **Modo compacto**: Ideal para integração em qualquer layout
-
-## 🔒 Segurança
-
-- **Row Level Security (RLS)** habilitado no Supabase
-- **Políticas públicas** apenas para leitura e inserção
-- **Validação client-side** e server-side
-- **Sanitização de dados** antes do envio
-- **Código embed seguro** com chaves públicas do Supabase
-- **CORS configurado** para aceitar requisições de qualquer domínio
-
-## 🌍 Integração Universal
-
-O sistema foi projetado para funcionar em **qualquer ambiente**:
-
-### Sistema Principal
-- Interface completa com estatísticas
-- Painel administrativo
-- Tema escuro permanente
-
-### Widget para Blogs
-- Código HTML independente
-- Tema escuro para consistência visual
-- Funciona sem dependências externas
-- Mantém conexão com banco de dados central
-
-### Casos de Uso
-- **Blogs pessoais**: Avaliação de posts
-- **Sites corporativos**: Feedback de conteúdo
-- **Documentação**: Qualidade das páginas
-- **E-commerce**: Avaliação de produtos
-- **Educação**: Feedback de aulas/materiais
-
-## 📝 Licença
-
-Este projeto é de uso livre para fins educacionais e demonstrativos.
-
----
-
-**Desenvolvido com ❤️ usando React + TypeScript + Supabase**
-
-*Última atualização: Dezembro 2024*
+- backend proprio com `Express`
+- persistencia em `SQLite`
+- painel admin protegido
+- remocao definitiva do Supabase
+- remocao da interface completa antiga
