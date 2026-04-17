@@ -152,7 +152,7 @@ function LoginScreen({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#fff1e8_0%,#fff8f4_38%,#f8fafc_100%)] px-4 py-10 dark:bg-slate-950">
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#fff1e8_0%,#fff8f4_38%,#f8fafc_100%)] px-4 py-10 dark:bg-[radial-gradient(circle_at_top,#111827_0%,#020617_52%,#020617_100%)]">
       <div className="w-full max-w-md rounded-[32px] border border-slate-200 bg-white/95 p-8 shadow-[0_24px_60px_rgba(148,163,184,0.22)] dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-[0_30px_80px_rgba(2,6,23,0.65)]">
         <div className="mb-8 text-center">
           <div className="relative mx-auto mb-5 flex w-fit items-center justify-center">
@@ -242,7 +242,7 @@ function Dashboard({
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#fff2e8_0%,#fff8f4_28%,#f8fafc_100%)] px-4 py-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#fff2e8_0%,#fff8f4_28%,#f8fafc_100%)] px-4 py-6 text-slate-900 dark:bg-[radial-gradient(circle_at_top,#111827_0%,#020617_52%,#020617_100%)] dark:text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-4">
@@ -268,13 +268,13 @@ function Dashboard({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm text-slate-600 shadow-[0_8px_18px_rgba(148,163,184,0.12)] dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:shadow-none">
+            <div className="rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm text-slate-600 shadow-[0_8px_18px_rgba(148,163,184,0.12)] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:shadow-none">
               Logado como <span className="font-medium text-slate-900 dark:text-white">{user.username}</span>
             </div>
             <button
               type="button"
               onClick={onRefresh}
-              className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700 transition hover:border-orange-300 hover:bg-orange-100 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-100 dark:hover:border-orange-400/40 dark:hover:bg-orange-500/15"
+              className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-700 transition hover:border-orange-300 hover:bg-orange-100 dark:border-orange-400/50 dark:bg-orange-500/15 dark:text-orange-100 dark:hover:border-orange-300 dark:hover:bg-orange-500/25"
             >
               <RefreshCw size={15} />
               Atualizar
@@ -282,7 +282,7 @@ function Dashboard({
             <button
               type="button"
               onClick={onLogout}
-              className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-100 dark:hover:border-rose-400/50 dark:hover:bg-rose-500/15"
+              className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 dark:border-rose-400/50 dark:bg-rose-500/15 dark:text-rose-100 dark:hover:border-rose-300 dark:hover:bg-rose-500/25"
             >
               <LogOut size={15} />
               Sair
