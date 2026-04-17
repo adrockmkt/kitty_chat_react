@@ -228,7 +228,7 @@ export function getOverviewStats() {
     .slice(0, 5);
 
   const bestPosts = [...aggregatedPosts]
-    .filter((item) => item.totalReactions > 0)
+    .filter((item) => item.totalReactions > 0 && item.averageSentiment > 0)
     .sort((left, right) => {
       if (right.averageSentiment !== left.averageSentiment) {
         return right.averageSentiment - left.averageSentiment;
@@ -239,7 +239,7 @@ export function getOverviewStats() {
     .slice(0, 5);
 
   const worstPosts = [...aggregatedPosts]
-    .filter((item) => item.totalReactions > 0)
+    .filter((item) => item.totalReactions > 0 && item.averageSentiment < 0)
     .sort((left, right) => {
       if (left.averageSentiment !== right.averageSentiment) {
         return left.averageSentiment - right.averageSentiment;
