@@ -33,12 +33,14 @@ function buildEmbedCode(appUrl: string) {
       background: #1f2937;
       border: 1px solid rgba(148, 163, 184, 0.18);
       border-radius: 24px;
-      padding: 28px 24px;
-      max-width: 640px;
-      margin: 24px auto;
+      padding: 28px 20px;
+      width: 100%;
+      max-width: 100%;
+      margin: 24px 0;
       box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
       color: #e5e7eb;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      box-sizing: border-box;
     }
     .kitty-reactions-title {
       text-align: center;
@@ -82,7 +84,7 @@ function buildEmbedCode(appUrl: string) {
     @media (max-width: 640px) {
       .kitty-reactions-card {
         border-radius: 20px;
-        padding: 22px 18px;
+        padding: 20px 14px;
       }
       .kitty-reactions-row {
         gap: 10px;

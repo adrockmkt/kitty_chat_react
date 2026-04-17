@@ -27,6 +27,12 @@ import { reactionMap } from './reactions.js';
 
 const reactionCooldown = new Map();
 
+function applyPublicCors(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string' && forwarded.length > 0) {
@@ -65,7 +71,13 @@ function registerApiRoutes(app, prefix) {
     res.json({ ok: true });
   });
 
+  app.options(`${prefix}/reactions`, (_req, res) => {
+    applyPublicCors(res);
+    return res.status(204).end();
+  });
+
   app.post(`${prefix}/reactions`, enforceReactionRateLimit, (req, res) => {
+    applyPublicCors(res);
     const emoji = sanitizeText(req.body?.emoji);
     const reaction = reactionMap.get(emoji);
     const postUrl = sanitizeText(req.body?.postUrl);
