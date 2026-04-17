@@ -57,8 +57,9 @@ function enforceReactionRateLimit(req, res, next) {
   const lastSeen = reactionCooldown.get(fingerprint);
 
   if (lastSeen && Date.now() - lastSeen < config.rateLimitWindowMs) {
+    applyPublicCors(res);
     return res.status(429).json({
-      error: 'Reacao recebida recentemente para este post. Aguarde alguns segundos.',
+      error: 'Reação recebida recentemente para este post. Aguarde alguns segundos.',
     });
   }
 
@@ -86,11 +87,11 @@ function registerApiRoutes(app, prefix) {
     const postId = sanitizeText(req.body?.postId);
 
     if (!reaction) {
-      return res.status(400).json({ error: 'Emoji invalido.' });
+      return res.status(400).json({ error: 'Emoji inválido.' });
     }
 
     if (!postUrl || !postPath) {
-      return res.status(400).json({ error: 'postUrl e postPath sao obrigatorios.' });
+      return res.status(400).json({ error: 'postUrl e postPath são obrigatórios.' });
     }
 
     insertReaction({
@@ -121,17 +122,17 @@ function registerApiRoutes(app, prefix) {
     const password = sanitizeText(req.body?.password);
 
     if (!username || !password) {
-      return res.status(400).json({ error: 'Usuario e senha sao obrigatorios.' });
+      return res.status(400).json({ error: 'Usuário e senha são obrigatórios.' });
     }
 
     const user = getAdminUserByUsername(username);
     if (!user) {
-      return res.status(401).json({ error: 'Credenciais invalidas.' });
+      return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
     const validPassword = await verifyPassword(password, user.passwordHash);
     if (!validPassword) {
-      return res.status(401).json({ error: 'Credenciais invalidas.' });
+      return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
     setSessionCookie(res, user.username);
@@ -179,7 +180,7 @@ function registerApiRoutes(app, prefix) {
     const details = getPostStats({ postUrl, postPath });
 
     if (!details) {
-      return res.status(404).json({ error: 'Post nao encontrado.' });
+      return res.status(404).json({ error: 'Post não encontrado.' });
     }
 
     return res.json(details);

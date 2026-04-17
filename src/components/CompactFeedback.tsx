@@ -27,12 +27,43 @@ function buildEmbedCode(appUrl: string) {
   const host = document.getElementById('kitty-reactions-widget');
   if (!host) return;
 
+  function readMetaContent(selector) {
+    try {
+      const element = document.querySelector(selector);
+      return element ? element.getAttribute('content') || '' : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function readLinkHref(selector) {
+    try {
+      const element = document.querySelector(selector);
+      return element ? element.getAttribute('href') || '' : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
   function getParentTitle() {
     try {
       if (window.parent && window.parent !== window && window.parent.document) {
         const title = window.parent.document.title || '';
         if (title && title.toLowerCase() !== 'srcdoc') {
           return title;
+        }
+      }
+    } catch (error) {}
+
+    return '';
+  }
+
+  function getParentUrl() {
+    try {
+      if (window.parent && window.parent !== window && window.parent.location) {
+        const href = window.parent.location.href || '';
+        if (href && href.startsWith('http')) {
+          return href;
         }
       }
     } catch (error) {}
@@ -51,11 +82,36 @@ function buildEmbedCode(appUrl: string) {
   }
 
   function getPageUrl() {
-    if (window.location && window.location.href && !window.location.href.startsWith('about:srcdoc')) {
+    const canonicalUrl = readLinkHref('link[rel="canonical"]');
+    if (canonicalUrl && canonicalUrl.startsWith('http')) {
+      return canonicalUrl;
+    }
+
+    const ogUrl = readMetaContent('meta[property="og:url"]');
+    if (ogUrl && ogUrl.startsWith('http')) {
+      return ogUrl;
+    }
+
+    const parentUrl = getParentUrl();
+    if (parentUrl) {
+      return parentUrl;
+    }
+
+    const referrerUrl = getReferrerUrl();
+    if (referrerUrl) {
+      return referrerUrl;
+    }
+
+    if (
+      window.location &&
+      window.location.href &&
+      !window.location.href.startsWith('about:srcdoc') &&
+      !window.location.href.startsWith('about:blank')
+    ) {
       return window.location.href;
     }
 
-    return getReferrerUrl();
+    return '';
   }
 
   function getPagePath(pageUrl) {
@@ -67,6 +123,16 @@ function buildEmbedCode(appUrl: string) {
   }
 
   function getPageTitle() {
+    const ogTitle = readMetaContent('meta[property="og:title"]');
+    if (ogTitle) {
+      return ogTitle;
+    }
+
+    const twitterTitle = readMetaContent('meta[name="twitter:title"]');
+    if (twitterTitle) {
+      return twitterTitle;
+    }
+
     const currentTitle = document.title || '';
     if (currentTitle && currentTitle.toLowerCase() !== 'srcdoc') {
       return currentTitle;
@@ -79,7 +145,7 @@ function buildEmbedCode(appUrl: string) {
 
     const url = getPageUrl();
     if (!url) {
-      return 'Post sem titulo';
+      return 'Post sem título';
     }
 
     try {
@@ -87,7 +153,7 @@ function buildEmbedCode(appUrl: string) {
       const slug = parsedUrl.pathname.split('/').filter(Boolean).pop() || parsedUrl.hostname;
       return slug.replace(/[-_]+/g, ' ');
     } catch (error) {
-      return 'Post sem titulo';
+      return 'Post sem título';
     }
   }
 
@@ -169,7 +235,7 @@ function buildEmbedCode(appUrl: string) {
 
   host.innerHTML = \`
     <section class="kitty-reactions-card">
-      <p class="kitty-reactions-title">Como voce avalia este conteudo?</p>
+      <p class="kitty-reactions-title">Como você avalia este conteúdo?</p>
       <div class="kitty-reactions-row">
         \${reactions.map((reaction, index) => \`<button class="kitty-reaction-button" type="button" data-index="\${index}" title="\${reaction.label}" aria-label="\${reaction.label}">\${reaction.emoji}</button>\`).join('')}
       </div>
@@ -205,12 +271,21 @@ function buildEmbedCode(appUrl: string) {
       });
 
       if (!response.ok) {
-        throw new Error('Falha ao enviar');
+        let errorMessage = 'Não foi possível registrar a reação.';
+        try {
+          const payload = await response.json();
+          if (payload && payload.error) {
+            errorMessage = payload.error;
+          }
+        } catch (error) {}
+
+        throw new Error(errorMessage);
       }
 
       message.textContent = 'Obrigado pelo feedback!';
     } catch (error) {
-      message.textContent = 'Nao foi possivel registrar a reacao.';
+      message.textContent =
+        error && error.message ? error.message : 'Não foi possível registrar a reação.';
       buttons[index].classList.remove('is-selected');
     } finally {
       setTimeout(() => {
@@ -258,7 +333,7 @@ export default function CompactFeedback({
       onFeedbackSent?.(emoji);
     } catch (error) {
       const nextMessage =
-        error instanceof Error ? error.message : 'Nao foi possivel registrar a reacao.';
+        error instanceof Error ? error.message : 'Não foi possível registrar a reação.';
       setMessage(nextMessage);
       setSelectedEmoji(null);
     } finally {
@@ -286,7 +361,7 @@ export default function CompactFeedback({
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Widget do blog</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Mesmo fluxo visual, agora apontando para sua API propria.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Mesmo fluxo visual, agora apontando para sua API própria.</p>
           </div>
           <button
             onClick={copyEmbedCode}
@@ -299,7 +374,7 @@ export default function CompactFeedback({
       )}
 
       <p className="mb-6 text-center text-[15px] text-slate-700 dark:text-slate-300">
-        Como voce avalia este conteudo?
+        Como você avalia este conteúdo?
       </p>
 
       <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">

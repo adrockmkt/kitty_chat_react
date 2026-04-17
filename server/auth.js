@@ -59,7 +59,7 @@ export function attachSession(req, _res, next) {
 
 export function requireAuth(req, res, next) {
   if (!req.session?.username) {
-    return res.status(401).json({ error: 'Nao autenticado.' });
+    return res.status(401).json({ error: 'Não autenticado.' });
   }
 
   return next();

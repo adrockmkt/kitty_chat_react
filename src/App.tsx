@@ -117,7 +117,7 @@ function RankingTable({
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">{post.postPath}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{post.totalReactions} reacoes</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{post.totalReactions} reações</p>
                     <p className={`text-xs ${tone.className}`}>{tone.label}</p>
                   </div>
                 </div>
@@ -170,7 +170,7 @@ function LoginScreen({
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <label className="block">
-            <span className="mb-2 block text-sm text-slate-700 dark:text-slate-300">Usuario</span>
+            <span className="mb-2 block text-sm text-slate-700 dark:text-slate-300">Usuário</span>
             <input
               value={username}
               onChange={(event) => setUsername(event.target.value)}
@@ -294,19 +294,19 @@ function Dashboard({
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
-            title="Total de reacoes"
+            title="Total de reações"
             value={String(overview?.summary.totalReactions ?? 0)}
-            hint="Todas as interacoes registradas pelo widget"
+            hint="Todas as interações registradas pelo widget"
             icon={<BarChart3 size={18} />}
           />
           <StatCard
             title="Posts rastreados"
             value={String(overview?.summary.trackedPosts ?? 0)}
-            hint="Quantidade de URLs ou paths com reacao"
+            hint="Quantidade de URLs ou paths com reação"
             icon={<Eye size={18} />}
           />
           <StatCard
-            title="Sentimento medio"
+            title="Sentimento médio"
             value={(overview?.summary.averageSentiment ?? 0).toFixed(2)}
             hint="Media consolidada do score dos emojis"
             icon={<LineChart size={18} />}
@@ -314,7 +314,7 @@ function Dashboard({
           <StatCard
             title="Taxa positiva"
             value={`${(overview?.summary.positiveRate ?? 0).toFixed(1)}%`}
-            hint="Percentual de reacoes com sentimento positivo"
+            hint="Percentual de reações com sentimento positivo"
             icon={<TrendingUp size={18} />}
           />
         </div>
@@ -324,16 +324,16 @@ function Dashboard({
             <div className="rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
               <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Visao por URL</h2>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Visão por URL</h2>
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Filtre posts, veja o ranking e abra o detalhe de um conteudo especifico.
+                    Filtre posts, veja o ranking e abra o detalhe de um conteúdo específico.
                   </p>
                 </div>
 
                 <input
                   value={search}
                   onChange={(event) => onSearchChange(event.target.value)}
-                  placeholder="Buscar por URL, path ou titulo"
+                  placeholder="Buscar por URL, path ou título"
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white lg:max-w-sm"
                 />
               </div>
@@ -351,7 +351,7 @@ function Dashboard({
                           <th className="px-4 py-3 font-medium">Post</th>
                           <th className="px-4 py-3 font-medium">Reacoes</th>
                           <th className="px-4 py-3 font-medium">Sentimento</th>
-                          <th className="px-4 py-3 font-medium">Ultima reacao</th>
+                          <th className="px-4 py-3 font-medium">Última reação</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -438,7 +438,7 @@ function Dashboard({
                 ))}
 
                 {overview?.emojiBreakdown.length === 0 ? (
-                  <p className="text-sm text-slate-600 dark:text-slate-400">As reacoes vao aparecer aqui assim que o widget receber cliques.</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">As reações vão aparecer aqui assim que o widget receber cliques.</p>
                 ) : null}
               </div>
             </div>
@@ -496,13 +496,13 @@ function Dashboard({
                         >
                           <span className="text-slate-700 dark:text-slate-300">{formatDate(point.day)}</span>
                           <span className="text-slate-500 dark:text-slate-400">
-                            {point.count} reacoes · score {point.averageSentiment.toFixed(2)}
+                            {point.count} reações · score {point.averageSentiment.toFixed(2)}
                           </span>
                         </div>
                       ))}
 
                       {postDetail.timeline.length === 0 ? (
-                        <p className="text-sm text-slate-600 dark:text-slate-400">Sem historico suficiente para este post.</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Sem histórico suficiente para este post.</p>
                       ) : null}
                     </div>
                   </div>
@@ -525,7 +525,7 @@ function Dashboard({
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-700 dark:text-slate-300">{formatDate(point.day)}</span>
                       <span className="text-slate-500 dark:text-slate-400">
-                        {point.count} reacoes · score {point.averageSentiment.toFixed(2)}
+                        {point.count} reações · score {point.averageSentiment.toFixed(2)}
                       </span>
                     </div>
                     <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-900">
@@ -538,7 +538,7 @@ function Dashboard({
                 ))}
 
                 {overview?.timeline.length === 0 ? (
-                  <p className="text-sm text-slate-600 dark:text-slate-400">A linha do tempo aparece quando houver reacoes registradas.</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">A linha do tempo aparece quando houver reações registradas.</p>
                 ) : null}
               </div>
             </div>
@@ -606,7 +606,7 @@ function App() {
       }
     } catch (error) {
       const nextMessage =
-        error instanceof Error ? error.message : 'Nao foi possivel carregar o painel.';
+        error instanceof Error ? error.message : 'Não foi possível carregar o painel.';
       setDashboardError(nextMessage);
     } finally {
       setDashboardLoading(false);
@@ -636,7 +636,7 @@ function App() {
       await refreshDashboard('');
     } catch (error) {
       const nextMessage =
-        error instanceof Error ? error.message : 'Nao foi possivel fazer login.';
+        error instanceof Error ? error.message : 'Não foi possível fazer login.';
       setAuthError(nextMessage);
     } finally {
       setAuthLoading(false);
@@ -659,7 +659,7 @@ function App() {
       setPostDetail(detail);
     } catch (error) {
       const nextMessage =
-        error instanceof Error ? error.message : 'Nao foi possivel carregar este post.';
+        error instanceof Error ? error.message : 'Não foi possível carregar este post.';
       setDashboardError(nextMessage);
     }
   }
