@@ -91,18 +91,18 @@ function RankingTable({
   onSelect: (post: PostStatsItem) => void;
 }) {
   return (
-    <div className="min-w-[280px] xl:min-w-0">
-      <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+    <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
+      <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
         <BarChart3 size={18} className="text-orange-500 dark:text-slate-300" />
         <h3 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h3>
       </div>
 
       {posts.length === 0 ? (
-        <div className="px-4 py-4">
+        <div className="px-5 py-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
         </div>
       ) : (
-        <div>
+        <div className="max-h-[300px] overflow-y-auto">
           {posts.map((post, index) => {
             const tone = scoreTone(post.averageSentiment);
 
@@ -111,7 +111,7 @@ function RankingTable({
                 key={`${title}-${post.postPath}`}
                 type="button"
                 onClick={() => onSelect(post)}
-                className={`w-full px-4 py-4 text-left transition hover:bg-orange-50 dark:hover:bg-slate-900/70 ${
+                className={`w-full px-5 py-4 text-left transition hover:bg-orange-50 dark:hover:bg-slate-900/70 ${
                   index > 0 ? 'border-t border-slate-200 dark:border-slate-700' : ''
                 }`}
               >
@@ -168,7 +168,7 @@ function LoginScreen({
           </div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Painel do Kitty Chat</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Entre com seu usuario e senha para ver o ranking de posts e a leitura de sentimento.
+            Entre com seu usuário e senha para ver o ranking de posts e a leitura de sentimento.
           </p>
         </div>
 
@@ -312,7 +312,7 @@ function Dashboard({
           <StatCard
             title="Sentimento médio"
             value={(overview?.summary.averageSentiment ?? 0).toFixed(2)}
-            hint="Media consolidada do score dos emojis"
+            hint="Média consolidada do score dos emojis"
             icon={<LineChart size={18} />}
           />
           <StatCard
@@ -343,7 +343,7 @@ function Dashboard({
               </div>
 
               {loading ? (
-                <p className="text-sm text-slate-600 dark:text-slate-400">Carregando estatisticas...</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Carregando estatísticas...</p>
               ) : posts.length === 0 ? (
                 <p className="text-sm text-slate-600 dark:text-slate-400">Nenhum post encontrado para este filtro.</p>
               ) : (
@@ -353,7 +353,7 @@ function Dashboard({
                       <thead className="bg-slate-100 text-slate-500 dark:bg-slate-900/90 dark:text-slate-400">
                         <tr>
                           <th className="px-4 py-3 font-medium">Post</th>
-                          <th className="px-4 py-3 font-medium">Reacoes</th>
+                          <th className="px-4 py-3 font-medium">Reações</th>
                           <th className="px-4 py-3 font-medium">Sentimento</th>
                           <th className="px-4 py-3 font-medium">Última reação</th>
                         </tr>
@@ -394,35 +394,25 @@ function Dashboard({
               )}
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
-              <div className="overflow-x-auto">
-                <div className="grid min-w-[920px] gap-0 xl:min-w-0 xl:grid-cols-3">
-                  <div className="max-h-[420px] min-h-0 overflow-y-auto border-r border-slate-200 dark:border-slate-700">
-                    <RankingTable
-                      title="Ranking por volume"
-                      posts={overview?.topPosts ?? []}
-                      emptyMessage="Sem dados suficientes ainda."
-                      onSelect={onSelectPost}
-                    />
-                  </div>
-                  <div className="max-h-[420px] min-h-0 overflow-y-auto border-r border-slate-200 dark:border-slate-700">
-                    <RankingTable
-                      title="Melhor sentimento"
-                      posts={overview?.bestPosts ?? []}
-                      emptyMessage="Sem dados suficientes ainda."
-                      onSelect={onSelectPost}
-                    />
-                  </div>
-                  <div className="max-h-[420px] min-h-0 overflow-y-auto">
-                    <RankingTable
-                      title="Pior sentimento"
-                      posts={overview?.worstPosts ?? []}
-                      emptyMessage="Sem dados suficientes ainda."
-                      onSelect={onSelectPost}
-                    />
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-6">
+              <RankingTable
+                title="Ranking por volume"
+                posts={overview?.topPosts ?? []}
+                emptyMessage="Sem dados suficientes ainda."
+                onSelect={onSelectPost}
+              />
+              <RankingTable
+                title="Melhor sentimento"
+                posts={overview?.bestPosts ?? []}
+                emptyMessage="Sem dados suficientes ainda."
+                onSelect={onSelectPost}
+              />
+              <RankingTable
+                title="Pior sentimento"
+                posts={overview?.worstPosts ?? []}
+                emptyMessage="Sem dados suficientes ainda."
+                onSelect={onSelectPost}
+              />
             </div>
           </div>
 
@@ -430,7 +420,36 @@ function Dashboard({
             <CompactFeedback showEmbedTools onFeedbackSent={() => void onRefresh()} />
 
             <div className="rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Distribuicao dos emojis</h2>
+              <div className="mb-4 flex items-center gap-2">
+                <TrendingUp size={18} className="text-orange-300" />
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Últimos 30 dias</h2>
+              </div>
+              <div className="space-y-3">
+                {(overview?.timeline ?? []).slice(-7).map((point) => (
+                  <div key={point.day} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-700 dark:text-slate-300">{formatDate(point.day)}</span>
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {point.count} reações · score {point.averageSentiment.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-900">
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-orange-400 to-rose-500"
+                        style={{ width: `${Math.min(point.count * 12, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                {overview?.timeline.length === 0 ? (
+                  <p className="text-sm text-slate-600 dark:text-slate-400">A linha do tempo aparece quando houver reações registradas.</p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Distribuição dos emojis</h2>
               <div className="mt-4 space-y-3">
                 {(overview?.emojiBreakdown ?? []).map((item) => (
                   <div key={item.emoji} className="space-y-2">
@@ -472,7 +491,7 @@ function Dashboard({
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4 dark:border-slate-700 dark:bg-slate-900/60">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Reacoes</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Reações</p>
                       <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
                         {postDetail.summary.totalReactions}
                       </p>
@@ -528,34 +547,6 @@ function Dashboard({
               )}
             </div>
 
-            <div className="rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
-              <div className="mb-4 flex items-center gap-2">
-                <TrendingUp size={18} className="text-orange-300" />
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Ultimos 30 dias</h2>
-              </div>
-              <div className="space-y-3">
-                {(overview?.timeline ?? []).slice(-7).map((point) => (
-                  <div key={point.day} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-700 dark:text-slate-300">{formatDate(point.day)}</span>
-                      <span className="text-slate-500 dark:text-slate-400">
-                        {point.count} reações · score {point.averageSentiment.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-900">
-                      <div
-                        className="h-2 rounded-full bg-gradient-to-r from-orange-400 to-rose-500"
-                        style={{ width: `${Math.min(point.count * 12, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-
-                {overview?.timeline.length === 0 ? (
-                  <p className="text-sm text-slate-600 dark:text-slate-400">A linha do tempo aparece quando houver reações registradas.</p>
-                ) : null}
-              </div>
-            </div>
           </div>
         </div>
       </div>
