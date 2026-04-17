@@ -146,10 +146,15 @@ function buildPostsWhereClause(searchTerm) {
 }
 
 function mapPostRow(row) {
+  const normalizedTitle =
+    row.post_title && row.post_title.toLowerCase() !== 'srcdoc' ? row.post_title : null;
+  const normalizedUrl =
+    row.post_url && !row.post_url.startsWith('about:srcdoc') ? row.post_url : null;
+
   return {
-    postUrl: row.post_url,
+    postUrl: normalizedUrl || row.post_path,
     postPath: row.post_path,
-    postTitle: row.post_title || row.post_path,
+    postTitle: normalizedTitle || normalizedUrl || row.post_path,
     postId: row.post_id,
     totalReactions: row.total_reactions,
     averageSentiment: Number(row.average_sentiment ?? 0),

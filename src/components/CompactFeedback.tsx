@@ -27,16 +27,80 @@ function buildEmbedCode(appUrl: string) {
   const host = document.getElementById('kitty-reactions-widget');
   if (!host) return;
 
+  function getParentTitle() {
+    try {
+      if (window.parent && window.parent !== window && window.parent.document) {
+        const title = window.parent.document.title || '';
+        if (title && title.toLowerCase() !== 'srcdoc') {
+          return title;
+        }
+      }
+    } catch (error) {}
+
+    return '';
+  }
+
+  function getReferrerUrl() {
+    try {
+      if (document.referrer && document.referrer.startsWith('http')) {
+        return document.referrer;
+      }
+    } catch (error) {}
+
+    return '';
+  }
+
+  function getPageUrl() {
+    if (window.location && window.location.href && !window.location.href.startsWith('about:srcdoc')) {
+      return window.location.href;
+    }
+
+    return getReferrerUrl();
+  }
+
+  function getPagePath(pageUrl) {
+    try {
+      return new URL(pageUrl).pathname || '/';
+    } catch (error) {
+      return '/';
+    }
+  }
+
+  function getPageTitle() {
+    const currentTitle = document.title || '';
+    if (currentTitle && currentTitle.toLowerCase() !== 'srcdoc') {
+      return currentTitle;
+    }
+
+    const parentTitle = getParentTitle();
+    if (parentTitle) {
+      return parentTitle;
+    }
+
+    const url = getPageUrl();
+    if (!url) {
+      return 'Post sem titulo';
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+      const slug = parsedUrl.pathname.split('/').filter(Boolean).pop() || parsedUrl.hostname;
+      return slug.replace(/[-_]+/g, ' ');
+    } catch (error) {
+      return 'Post sem titulo';
+    }
+  }
+
   const style = document.createElement('style');
   style.textContent = \`
     .kitty-reactions-card {
       background: #1f2937;
       border: 1px solid rgba(148, 163, 184, 0.18);
       border-radius: 24px;
-      padding: 28px 20px;
+      padding: 24px 14px;
       width: 100%;
       max-width: 100%;
-      margin: 24px 0;
+      margin: 24px 0 24px 0;
       box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
       color: #e5e7eb;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -84,7 +148,7 @@ function buildEmbedCode(appUrl: string) {
     @media (max-width: 640px) {
       .kitty-reactions-card {
         border-radius: 20px;
-        padding: 20px 14px;
+        padding: 18px 10px;
       }
       .kitty-reactions-row {
         gap: 10px;
@@ -97,6 +161,11 @@ function buildEmbedCode(appUrl: string) {
     }
   \`;
   document.head.appendChild(style);
+  host.style.display = 'block';
+  host.style.width = '100%';
+  host.style.margin = '0';
+  host.style.padding = '0';
+  host.style.boxSizing = 'border-box';
 
   host.innerHTML = \`
     <section class="kitty-reactions-card">
@@ -113,6 +182,9 @@ function buildEmbedCode(appUrl: string) {
 
   async function sendReaction(index) {
     const reaction = reactions[index];
+    const pageUrl = getPageUrl();
+    const pagePath = getPagePath(pageUrl);
+    const pageTitle = getPageTitle();
     buttons.forEach((button) => {
       button.disabled = true;
       button.classList.remove('is-selected');
@@ -126,9 +198,9 @@ function buildEmbedCode(appUrl: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           emoji: reaction.emoji,
-          postUrl: window.location.href,
-          postPath: window.location.pathname,
-          postTitle: document.title
+          postUrl: pageUrl,
+          postPath: pagePath,
+          postTitle: pageTitle
         })
       });
 
