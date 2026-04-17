@@ -1,46 +1,46 @@
 # Kitty Chat
 
-Painel de reacoes para blog com backend proprio, banco local e dashboard privado.
+Painel de reações para blog com backend próprio, banco local e dashboard privado.
 
-O projeto evoluiu da versao anterior baseada em Supabase para uma arquitetura mais simples de operar na DigitalOcean: widget de reacoes para blog, API propria em `Express`, persistencia em `SQLite` e painel privado para leitura de sentimento por post.
+O Kitty Chat evoluiu da versão antiga baseada em Supabase para uma arquitetura mais simples de operar na DigitalOcean: widget de reações para blog, API própria em `Express`, persistência em `SQLite` e painel privado para leitura de sentimento por post.
 
 ## Status Atual
 
-O escopo ativo hoje e:
+O escopo ativo hoje é:
 
-1. Widget de reacoes para blog com 5 emojis.
-2. API propria para registrar reacoes.
+1. Widget de reações para blog com 5 emojis.
+2. API própria para registrar reações.
 3. Painel administrativo privado com login.
-4. Analise consolidada de sentimento por URL e ranking de posts.
+4. Análise consolidada de sentimento por URL e ranking de posts.
 
 Itens removidos do fluxo principal:
 
 - interface completa antiga com carrossel
-- comentarios opcionais
-- estatisticas publicas
+- comentários opcionais
+- estatísticas públicas
 - heartbeat via Supabase
-- cliente e persistencia em Supabase
+- cliente e persistência em Supabase
 
 ## Principais Recursos
 
 ### Widget do blog
 
-- 5 emojis para avaliacao rapida do conteudo
-- confirmacao visual apos o clique
-- captura automatica de `post_url`, `post_path` e `post_title`
-- embed independente para inserir em qualquer pagina
-- visual do widget preservado para harmonizar com o blog
+- 5 emojis para avaliação rápida do conteúdo
+- confirmação visual após o clique
+- captura automática de `post_url`, `post_path` e `post_title`
+- suporte a embed para uso em páginas do blog e no Framer
+- visual do widget preservado para harmonizar com o site
 
 ### Painel administrativo
 
-- login com usuario e senha
-- visao geral com total de reacoes, posts rastreados, sentimento medio e taxa positiva
-- ranking por volume de reacoes
-- ranking de melhor sentimento
-- ranking de pior sentimento
+- login com usuário e senha
+- visão geral com total de reações, posts rastreados, sentimento médio e taxa positiva
+- ranking por volume de reações
+- ranking de melhor sentimento, filtrando apenas posts positivos
+- ranking de pior sentimento, filtrando apenas posts negativos
 - detalhe por URL/post
-- timeline recente de reacoes
-- busca por URL, path ou titulo
+- timeline recente de reações
+- busca por URL, path ou título
 
 ### Tema
 
@@ -64,7 +64,7 @@ Itens removidos do fluxo principal:
 - `cookie-parser`
 - `bcryptjs`
 
-### Persistencia
+### Persistência
 
 - `SQLite` via `better-sqlite3`
 
@@ -90,7 +90,7 @@ kitty_chat/
 
 ## Mapeamento de Sentimento
 
-| Emoji | Rotulo | Score |
+| Emoji | Rótulo | Score |
 | --- | --- | --- |
 | `😭` | Muito ruim | `-2` |
 | `😕` | Ruim | `-1` |
@@ -98,14 +98,14 @@ kitty_chat/
 | `😊` | Bom | `1` |
 | `🤩` | Excelente | `2` |
 
-Esse score e usado para:
+Esse score é usado para:
 
-- sentimento medio geral
-- sentimento medio por post
-- comparacao entre posts
-- ranking de conteudos com percepcao melhor ou pior
+- sentimento médio geral
+- sentimento médio por post
+- comparação entre posts
+- ranking de conteúdos com percepção melhor ou pior
 
-## Dados Registrados por Reacao
+## Dados Registrados por Reação
 
 Cada clique no widget salva:
 
@@ -120,9 +120,11 @@ Cada clique no widget salva:
 - `ip_hash`
 - `user_agent`
 
+O embed atual também tenta resolver corretamente o contexto do post quando está inserido em ambientes como Framer, usando `canonical`, `og:url`, `document.referrer` e contexto pai quando necessário.
+
 ## Endpoints
 
-### Publicos
+### Públicos
 
 - `POST /api/reactions`
 
@@ -133,7 +135,7 @@ Payload base:
   "emoji": "😊",
   "postUrl": "https://adrock.com.br/blog/exemplo",
   "postPath": "/blog/exemplo",
-  "postTitle": "Titulo do post"
+  "postTitle": "Título do post"
 }
 ```
 
@@ -146,7 +148,7 @@ Payload base:
 - `GET /api/stats/posts`
 - `GET /api/stats/post?path=...`
 
-## Variaveis de Ambiente
+## Variáveis de Ambiente
 
 Crie um `.env` na raiz baseado em [/.env.example](/Users/rafaellins/Documents/Projetos%20Ad%20Rockers/Ad%20Rockers/kitty_chat/.env.example):
 
@@ -155,20 +157,20 @@ KITTY_ADMIN_USERNAME=admin
 KITTY_ADMIN_PASSWORD=troque-esta-senha
 KITTY_SESSION_SECRET=troque-esta-chave
 KITTY_BASE_PATH=/kitty-chat
-PORT=3000
+PORT=3100
 ```
 
-### O que cada variavel faz
+### O que cada variável faz
 
-- `KITTY_ADMIN_USERNAME`: usuario de acesso ao painel
+- `KITTY_ADMIN_USERNAME`: usuário de acesso ao painel
 - `KITTY_ADMIN_PASSWORD`: senha do painel
-- `KITTY_SESSION_SECRET`: chave usada para assinar a sessao autenticada
-- `KITTY_BASE_PATH`: base publica do painel
+- `KITTY_SESSION_SECRET`: chave usada para assinar a sessão autenticada
+- `KITTY_BASE_PATH`: base pública do painel
 - `PORT`: porta do servidor backend
 
-## Execucao Local
+## Execução Local
 
-Instale as dependencias:
+Instale as dependências:
 
 ```bash
 npm install
@@ -205,40 +207,45 @@ npm run preview
 
 ## Banco e Login Admin
 
-- o banco local e criado automaticamente em `data/kitty-chat.sqlite`
-- o usuario admin inicial e criado a partir do `.env`
-- se o usuario `KITTY_ADMIN_USERNAME` ja existir, a senha e sincronizada com `KITTY_ADMIN_PASSWORD`
+- o banco local é criado automaticamente em `data/kitty-chat.sqlite`
+- o usuário admin inicial é criado a partir do `.env`
+- se o usuário `KITTY_ADMIN_USERNAME` já existir, a senha é sincronizada com `KITTY_ADMIN_PASSWORD`
 
-## Seguranca
+## Segurança
 
 - senha armazenada com hash
-- sessao autenticada por cookie `httpOnly`
-- hash de IP para reduzir armazenamento sensivel
-- cooldown basico por IP e por post no endpoint publico de reacoes
+- sessão autenticada por cookie `httpOnly`
+- hash de IP para reduzir armazenamento sensível
+- cooldown básico por IP e por post no endpoint público de reações
+- CORS habilitado no endpoint público para permitir uso do widget embedado fora do painel
 
 ## Deploy
 
-Para producao, a ideia atual e servir:
+Em produção, o projeto roda assim:
 
 1. frontend buildado em `dist/`
-2. backend Node com `node server/index.js`
+2. backend Node com `server/index.js`
 3. banco `SQLite` local no servidor
+4. `pm2` segurando o processo do app
+5. `nginx` servindo `/kitty-chat/` e roteando `/kitty-chat/api/`
 
-O painel previsto continua em:
+URL atual:
 
-- `https://mobiledelivery.com.br/kitty-chat`
+- `https://mobiledelivery.com.br/kitty-chat/`
 
-## Criterios de Aceite da Nova Versao
+## Critérios de Aceite da Nova Versão
 
-- o widget registra reacoes sem depender de Supabase
-- cada reacao fica vinculada ao post correto
+- o widget registra reações sem depender de Supabase
+- cada reação fica vinculada ao post correto
 - o painel privado exige login
-- o painel mostra estatisticas totais e por URL
+- o painel mostra estatísticas totais e por URL
 - o painel mostra ranking por volume e por sentimento
-- o sistema opera com banco proprio no servidor
+- o sistema opera com banco próprio no servidor
 
-## Observacoes
+## Observações
 
 - o embed do widget segue independente do painel
-- o visual do widget foi preservado para nao quebrar a harmonia com o blog
-- o painel foi redesenhado para refletir a identidade visual da marca e acompanhar tema claro/escuro automaticamente
+- o visual do widget foi preservado para não quebrar a harmonia com o blog
+- o painel foi redesenhado para refletir a identidade visual da marca
+- o ranking de melhor sentimento mostra apenas posts positivos
+- o ranking de pior sentimento mostra apenas posts negativos
