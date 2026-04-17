@@ -1,295 +1,254 @@
-import { useState, useEffect } from 'react';
-import { Copy, Code } from 'lucide-react';
-import { submitFeedback } from '../services/feedbackService';
+import { useMemo, useState } from 'react';
+import { Code, Copy } from 'lucide-react';
 
-const compactEmojis = [
-  { emoji: '😭', tooltip: 'Muito ruim' },
-  { emoji: '😕', tooltip: 'Ruim' },
-  { emoji: '😐', tooltip: 'Ok' },
-  { emoji: '😊', tooltip: 'Bom' },
-  { emoji: '🤩', tooltip: 'Excelente' }
-];
+import { getPublicAppUrl, reactionOptions } from '../lib/reactions';
+import { submitReaction } from '../services/api';
 
 interface CompactFeedbackProps {
   postId?: string;
-  onFeedbackSent?: (feedback: any) => void;
+  showEmbedTools?: boolean;
+  onFeedbackSent?: (emoji: string) => void;
 }
 
-export default function CompactFeedback({ postId, onFeedbackSent }: CompactFeedbackProps) {
-  const [selectedEmoji, setSelectedEmoji] = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
-  const [showEmbed, setShowEmbed] = useState(false);
-  const [embedCopied, setEmbedCopied] = useState(false);
-
-  const generateEmbedCode = () => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    return `<!-- Kitty Chat Feedback Widget -->
-<div id="kitty-feedback-widget"></div>
+function buildEmbedCode(appUrl: string) {
+  return `<!-- Kitty Chat Reacoes -->
+<div id="kitty-reactions-widget"></div>
 <script>
 (function() {
-  // CSS Styles
-  const styles = \`
-    .kitty-feedback {
-      background: #1f2937;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-      border: 1px solid #374151;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      max-width: 400px;
-      margin: 20px auto;
-      color: white;
-    }
-    .kitty-feedback p {
-      text-align: center;
-      margin-bottom: 12px;
-      font-size: 14px;
-      color: #d1d5db;
-    }
-    .kitty-feedback-emojis {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .kitty-feedback-emoji {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      font-size: 18px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .kitty-feedback-emoji:hover {
-      transform: scale(1.1);
-      background: #374151;
-    }
-    .kitty-feedback-emoji.selected {
-      background: #dcfce7;
-      transform: scale(1.1);
-    }
-    .kitty-feedback-message {
-      text-align: center;
-      font-size: 14px;
-      color: #d1d5db;
-    }
-  \`;
-  
-  // Add styles to page
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = styles;
-  document.head.appendChild(styleSheet);
-  
-  // Emojis data
-  const emojis = [
-    { emoji: '😭', tooltip: 'Muito ruim' },
-    { emoji: '😕', tooltip: 'Ruim' },
-    { emoji: '😐', tooltip: 'Ok' },
-    { emoji: '😊', tooltip: 'Bom' },
-    { emoji: '🤩', tooltip: 'Excelente' }
+  const apiUrl = '${appUrl}/api/reactions';
+  const reactions = [
+    { emoji: '😭', label: 'Muito ruim' },
+    { emoji: '😕', label: 'Ruim' },
+    { emoji: '😐', label: 'Ok' },
+    { emoji: '😊', label: 'Bom' },
+    { emoji: '🤩', label: 'Excelente' }
   ];
-  
-  // Create widget HTML
-  const widget = document.getElementById('kitty-feedback-widget');
-  widget.innerHTML = \`
-    <div class="kitty-feedback">
-      <p>Como você avalia este conteúdo?</p>
-      <div class="kitty-feedback-emojis">
-        \${emojis.map((item, index) => 
-          \`<button class="kitty-feedback-emoji" data-index="\${index}" title="\${item.tooltip}">
-            \${item.emoji}
-          </button>\`
-        ).join('')}
-      </div>
-      <div class="kitty-feedback-message" id="feedback-message"></div>
-    </div>
-  \`;
-  
-  // Add click handlers
-  const emojiButtons = widget.querySelectorAll('.kitty-feedback-emoji');
-  const messageDiv = widget.querySelector('#feedback-message');
-  
-  emojiButtons.forEach((button, index) => {
-    button.addEventListener('click', async () => {
-      // Visual feedback
-      emojiButtons.forEach(btn => btn.classList.remove('selected'));
-      button.classList.add('selected');
-      
-      // Disable buttons during submission
-      emojiButtons.forEach(btn => btn.disabled = true);
-      messageDiv.textContent = 'Enviando...';
-      
-      try {
-        // Submit to Supabase
-        const response = await fetch('${supabaseUrl}/rest/v1/feedback', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': '${supabaseKey}',
-            'Authorization': 'Bearer ${supabaseKey}',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            emoji: emojis[index].emoji,
-            emotion: emojis[index].tooltip,
-            comment: 'Feedback do blog: ' + window.location.href,
-            post_id: window.location.pathname,
-            created_at: new Date().toISOString()
-          })
-        });
-        
-        if (response.ok) {
-          messageDiv.textContent = '✅ Obrigado pelo feedback!';
-          setTimeout(() => {
-            messageDiv.textContent = '';
-            emojiButtons.forEach(btn => {
-              btn.disabled = false;
-              btn.classList.remove('selected');
-            });
-          }, 3000);
-        } else {
-          throw new Error('Erro na resposta');
-        }
-      } catch (error) {
-        messageDiv.textContent = '❌ Erro ao enviar feedback';
-        setTimeout(() => {
-          messageDiv.textContent = '';
-          emojiButtons.forEach(btn => btn.disabled = false);
-        }, 3000);
+
+  const host = document.getElementById('kitty-reactions-widget');
+  if (!host) return;
+
+  const style = document.createElement('style');
+  style.textContent = \`
+    .kitty-reactions-card {
+      background: #1f2937;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 24px;
+      padding: 28px 24px;
+      max-width: 640px;
+      margin: 24px auto;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
+      color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .kitty-reactions-title {
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #d1d5db;
+      margin: 0 0 22px;
+    }
+    .kitty-reactions-row {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .kitty-reaction-button {
+      width: 54px;
+      height: 54px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font-size: 29px;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+    .kitty-reaction-button:hover {
+      transform: translateY(-2px) scale(1.05);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .kitty-reaction-button.is-selected {
+      background: rgba(245, 158, 11, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.22);
+    }
+    .kitty-reactions-message {
+      min-height: 22px;
+      margin-top: 18px;
+      text-align: center;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    @media (max-width: 640px) {
+      .kitty-reactions-card {
+        border-radius: 20px;
+        padding: 22px 18px;
       }
+      .kitty-reactions-row {
+        gap: 10px;
+      }
+      .kitty-reaction-button {
+        width: 48px;
+        height: 48px;
+        font-size: 25px;
+      }
+    }
+  \`;
+  document.head.appendChild(style);
+
+  host.innerHTML = \`
+    <section class="kitty-reactions-card">
+      <p class="kitty-reactions-title">Como voce avalia este conteudo?</p>
+      <div class="kitty-reactions-row">
+        \${reactions.map((reaction, index) => \`<button class="kitty-reaction-button" type="button" data-index="\${index}" title="\${reaction.label}" aria-label="\${reaction.label}">\${reaction.emoji}</button>\`).join('')}
+      </div>
+      <div class="kitty-reactions-message" id="kitty-reactions-message"></div>
+    </section>
+  \`;
+
+  const buttons = Array.from(host.querySelectorAll('.kitty-reaction-button'));
+  const message = host.querySelector('#kitty-reactions-message');
+
+  async function sendReaction(index) {
+    const reaction = reactions[index];
+    buttons.forEach((button) => {
+      button.disabled = true;
+      button.classList.remove('is-selected');
+    });
+    buttons[index].classList.add('is-selected');
+    message.textContent = 'Enviando...';
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emoji: reaction.emoji,
+          postUrl: window.location.href,
+          postPath: window.location.pathname,
+          postTitle: document.title
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao enviar');
+      }
+
+      message.textContent = 'Obrigado pelo feedback!';
+    } catch (error) {
+      message.textContent = 'Nao foi possivel registrar a reacao.';
+      buttons[index].classList.remove('is-selected');
+    } finally {
+      setTimeout(() => {
+        buttons.forEach((button) => {
+          button.disabled = false;
+          button.classList.remove('is-selected');
+        });
+        message.textContent = '';
+      }, 2500);
+    }
+  }
+
+  buttons.forEach((button, index) => {
+    button.addEventListener('click', function() {
+      sendReaction(index);
     });
   });
 })();
-</script>
-<!-- Fim do Kitty Chat Feedback Widget -->`;
-  };
+</script>`;
+}
 
-  const copyEmbedCode = async () => {
-    try {
-      await navigator.clipboard.writeText(generateEmbedCode());
-      setEmbedCopied(true);
-      setTimeout(() => setEmbedCopied(false), 2000);
-    } catch (error) {
-      console.error('Erro ao copiar:', error);
+export default function CompactFeedback({
+  postId,
+  showEmbedTools = true,
+  onFeedbackSent,
+}: CompactFeedbackProps) {
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+  const [embedCopied, setEmbedCopied] = useState(false);
+  const embedCode = useMemo(() => buildEmbedCode(getPublicAppUrl()), []);
+
+  async function handleEmojiClick(emoji: string) {
+    if (isSubmitting) {
+      return;
     }
-  };
 
-  const handleEmojiClick = async (index: number) => {
-    if (isSubmitting) return;
-    
-    setSelectedEmoji(index);
+    setSelectedEmoji(emoji);
     setIsSubmitting(true);
+    setMessage('');
 
     try {
-      const feedback = {
-        emoji: compactEmojis[index].emoji,
-        emotion: compactEmojis[index].tooltip,
-        comment: postId ? `Post: ${postId}` : '',
-        post_id: postId
-      };
-
-      await submitFeedback(feedback);
-      setMessage('✅ Obrigado pelo feedback!');
-      onFeedbackSent?.(feedback);
-      
-      setTimeout(() => {
-        setMessage('');
-        setSelectedEmoji(null);
-      }, 3000);
+      await submitReaction(emoji, postId);
+      setMessage('Obrigado pelo feedback!');
+      onFeedbackSent?.(emoji);
     } catch (error) {
-      setMessage('❌ Erro ao enviar feedback');
-      setTimeout(() => setMessage(''), 3000);
+      const nextMessage =
+        error instanceof Error ? error.message : 'Nao foi possivel registrar a reacao.';
+      setMessage(nextMessage);
+      setSelectedEmoji(null);
     } finally {
       setIsSubmitting(false);
+      window.setTimeout(() => {
+        setMessage('');
+        setSelectedEmoji(null);
+      }, 2500);
     }
-  };
+  }
+
+  async function copyEmbedCode() {
+    try {
+      await navigator.clipboard.writeText(embedCode);
+      setEmbedCopied(true);
+      window.setTimeout(() => setEmbedCopied(false), 2000);
+    } catch (error) {
+      console.error('Erro ao copiar o embed:', error);
+    }
+  }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-      {/* Botão de Embed */}
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={() => setShowEmbed(!showEmbed)}
-          className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <Code size={12} />
-          📋 Embed
-        </button>
-      </div>
-
-      {/* Modal de Embed */}
-      {showEmbed && (
-        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded border">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-              Código para seu blog
-            </h4>
-            <button
-              onClick={() => setShowEmbed(false)}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            >
-              ✕
-            </button>
+    <section className="rounded-[28px] border border-slate-200/80 bg-white/90 px-6 py-7 shadow-[0_18px_40px_rgba(148,163,184,0.16)] dark:border-slate-700/70 dark:bg-slate-800 dark:shadow-[0_24px_60px_rgba(15,23,42,0.4)]">
+      {showEmbedTools && (
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Widget do blog</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Mesmo fluxo visual, agora apontando para sua API propria.</p>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-            Cole este código no seu blog. Funciona com tema automático e mantém conexão com o banco de dados.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={copyEmbedCode}
-              className={`flex-1 px-3 py-2 text-xs rounded flex items-center justify-center gap-1 transition-colors ${
-                embedCopied 
-                  ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' 
-                  : 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
-              }`}
-            >
-              <Copy size={12} />
-              {embedCopied ? 'Copiado!' : 'Copiar código'}
-            </button>
-          </div>
+          <button
+            onClick={copyEmbedCode}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-orange-300 hover:bg-orange-50 dark:border-slate-600 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-900"
+          >
+            {embedCopied ? <Copy size={14} /> : <Code size={14} />}
+            {embedCopied ? 'Copiado' : 'Copiar embed'}
+          </button>
         </div>
       )}
 
-      <div className="text-center mb-3">
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Como você avalia este conteúdo?
-        </p>
-      </div>
+      <p className="mb-6 text-center text-[15px] text-slate-700 dark:text-slate-300">
+        Como voce avalia este conteudo?
+      </p>
 
-      <div className="flex justify-center gap-2 mb-3">
-        {compactEmojis.map((item, index) => (
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+        {reactionOptions.map((reaction) => (
           <button
-            key={index}
-            onClick={() => handleEmojiClick(index)}
+            key={reaction.emoji}
+            type="button"
+            onClick={() => handleEmojiClick(reaction.emoji)}
             disabled={isSubmitting}
-            className={`
-              relative w-10 h-10 rounded-full text-xl transition-all duration-200
-              hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-700
-              ${selectedEmoji === index ? 'bg-green-100 dark:bg-green-900 scale-110' : ''}
-              ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-            `}
-            title={item.tooltip}
+            aria-label={reaction.label}
+            title={reaction.label}
+            className={`flex h-12 w-12 items-center justify-center rounded-full text-[29px] transition duration-200 sm:h-14 sm:w-14 ${
+              selectedEmoji === reaction.emoji
+                ? 'scale-105 bg-amber-300/15 shadow-[inset_0_0_0_1px_rgba(251,191,36,0.25)]'
+                : 'hover:-translate-y-0.5 hover:scale-105 hover:bg-slate-100 dark:hover:bg-white/5'
+            } ${isSubmitting ? 'cursor-not-allowed opacity-70' : ''}`}
           >
-            {item.emoji}
+            {reaction.emoji}
           </button>
         ))}
       </div>
 
-      {message && (
-        <div className="text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {message}
-          </p>
-        </div>
-      )}
-    </div>
+      <div className="mt-5 min-h-6 text-center text-sm text-slate-500 dark:text-slate-400">{message}</div>
+    </section>
   );
 }
