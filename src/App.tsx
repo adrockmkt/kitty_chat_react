@@ -91,16 +91,19 @@ function RankingTable({
   onSelect: (post: PostStatsItem) => void;
 }) {
   return (
-    <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-slate-800/90 dark:shadow-none">
+    <div className="flex h-[420px] min-h-0 flex-col rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-slate-800/90 dark:shadow-none">
       <div className="mb-4 flex items-center gap-2">
         <BarChart3 size={18} className="text-orange-500 dark:text-slate-300" />
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>
       </div>
 
       {posts.length === 0 ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
+        <div className="flex flex-1 items-start">
+          <p className="text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          <div className="space-y-3">
           {posts.map((post) => {
             const tone = scoreTone(post.averageSentiment);
 
@@ -124,6 +127,7 @@ function RankingTable({
               </button>
             );
           })}
+          </div>
         </div>
       )}
     </div>
@@ -390,7 +394,7 @@ function Dashboard({
               )}
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 xl:grid-cols-3">
               <RankingTable
                 title="Ranking por volume"
                 posts={overview?.topPosts ?? []}
