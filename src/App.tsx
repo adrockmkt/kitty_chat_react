@@ -91,20 +91,19 @@ function RankingTable({
   onSelect: (post: PostStatsItem) => void;
 }) {
   return (
-    <div className="flex h-[420px] min-h-0 flex-col rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-slate-800/90 dark:shadow-none">
-      <div className="mb-4 flex items-center gap-2">
+    <div className="min-w-[280px] xl:min-w-0">
+      <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
         <BarChart3 size={18} className="text-orange-500 dark:text-slate-300" />
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h3>
       </div>
 
       {posts.length === 0 ? (
-        <div className="flex flex-1 items-start">
+        <div className="px-4 py-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <div className="space-y-3">
-          {posts.map((post) => {
+        <div>
+          {posts.map((post, index) => {
             const tone = scoreTone(post.averageSentiment);
 
             return (
@@ -112,14 +111,16 @@ function RankingTable({
                 key={`${title}-${post.postPath}`}
                 type="button"
                 onClick={() => onSelect(post)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-left transition hover:border-orange-400/40 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-orange-500/40 dark:hover:bg-slate-900"
+                className={`w-full px-4 py-4 text-left transition hover:bg-orange-50 dark:hover:bg-slate-900/70 ${
+                  index > 0 ? 'border-t border-slate-200 dark:border-slate-700' : ''
+                }`}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="font-medium text-slate-900 dark:text-slate-100">{post.postTitle || post.postPath}</p>
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">{post.postPath}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 text-right">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">{post.totalReactions} reações</p>
                     <p className={`text-xs ${tone.className}`}>{tone.label}</p>
                   </div>
@@ -127,7 +128,6 @@ function RankingTable({
               </button>
             );
           })}
-          </div>
         </div>
       )}
     </div>
@@ -394,25 +394,35 @@ function Dashboard({
               )}
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-3">
-              <RankingTable
-                title="Ranking por volume"
-                posts={overview?.topPosts ?? []}
-                emptyMessage="Sem dados suficientes ainda."
-                onSelect={onSelectPost}
-              />
-              <RankingTable
-                title="Melhor sentimento"
-                posts={overview?.bestPosts ?? []}
-                emptyMessage="Sem dados suficientes ainda."
-                onSelect={onSelectPost}
-              />
-              <RankingTable
-                title="Pior sentimento"
-                posts={overview?.worstPosts ?? []}
-                emptyMessage="Sem dados suficientes ainda."
-                onSelect={onSelectPost}
-              />
+            <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
+              <div className="overflow-x-auto">
+                <div className="grid min-w-[920px] gap-0 xl:min-w-0 xl:grid-cols-3">
+                  <div className="max-h-[420px] min-h-0 overflow-y-auto border-r border-slate-200 dark:border-slate-700">
+                    <RankingTable
+                      title="Ranking por volume"
+                      posts={overview?.topPosts ?? []}
+                      emptyMessage="Sem dados suficientes ainda."
+                      onSelect={onSelectPost}
+                    />
+                  </div>
+                  <div className="max-h-[420px] min-h-0 overflow-y-auto border-r border-slate-200 dark:border-slate-700">
+                    <RankingTable
+                      title="Melhor sentimento"
+                      posts={overview?.bestPosts ?? []}
+                      emptyMessage="Sem dados suficientes ainda."
+                      onSelect={onSelectPost}
+                    />
+                  </div>
+                  <div className="max-h-[420px] min-h-0 overflow-y-auto">
+                    <RankingTable
+                      title="Pior sentimento"
+                      posts={overview?.worstPosts ?? []}
+                      emptyMessage="Sem dados suficientes ainda."
+                      onSelect={onSelectPost}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
