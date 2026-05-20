@@ -466,7 +466,7 @@ function Dashboard({
           </div>
 
           <div className="space-y-6">
-            <CompactFeedback showEmbedTools onFeedbackSent={() => void onRefresh()} />
+            <CompactFeedback previewOnly showEmbedTools onFeedbackSent={() => void onRefresh()} />
 
             <div className="rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
               <div className="mb-4 flex items-center gap-2">

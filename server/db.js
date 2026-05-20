@@ -442,6 +442,14 @@ export function removeTestReactions() {
   const deleteStatement = db.prepare(`
     DELETE FROM reactions
     WHERE
+      post_path = '/kitty-chat'
+      OR post_path LIKE '/kitty-chat/%'
+      OR post_url LIKE '%/kitty-chat'
+      OR post_url LIKE '%/kitty-chat/%'
+      OR post_title LIKE 'Kitty Chat | Painel de reações%'
+      OR post_title LIKE 'Painel de reações%'
+      OR post_title LIKE 'Kitty Chat%'
+      OR
       post_path IN ('srcdoc', 'about:srcdoc')
       OR post_url LIKE 'about:srcdoc%'
       OR post_title = 'srcdoc'

@@ -30,6 +30,7 @@ Itens removidos do fluxo principal:
 - captura automática de `post_url`, `post_path` e `post_title`
 - suporte a embed para uso em páginas do blog e no Framer
 - visual do widget preservado para harmonizar com o site
+- o widget exibido dentro do painel é apenas demonstrativo e não registra reações do próprio `/kitty-chat`
 
 ### Painel administrativo
 
@@ -262,3 +263,11 @@ URL atual:
 - o painel foi redesenhado para refletir a identidade visual da marca
 - o ranking de melhor sentimento mostra apenas posts positivos
 - o ranking de pior sentimento mostra apenas posts negativos
+
+## Próximos Passos
+
+- melhorar analytics com cortes mais editoriais por conteúdo, volume e polaridade
+- criar filtros mais avançados no painel, como intervalo customizado e combinações por sentimento
+- implementar retenção de backups antigos para não crescer indefinidamente no servidor
+- evoluir as exportações para formatos mais ricos e recortes por período
+- continuar o refinamento visual do painel conforme o uso real

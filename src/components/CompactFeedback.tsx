@@ -8,6 +8,7 @@ interface CompactFeedbackProps {
   postId?: string;
   showEmbedTools?: boolean;
   onFeedbackSent?: (emoji: string) => void;
+  previewOnly?: boolean;
 }
 
 function buildEmbedCode(appUrl: string) {
@@ -311,6 +312,7 @@ export default function CompactFeedback({
   postId,
   showEmbedTools = true,
   onFeedbackSent,
+  previewOnly = false,
 }: CompactFeedbackProps) {
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -320,6 +322,16 @@ export default function CompactFeedback({
 
   async function handleEmojiClick(emoji: string) {
     if (isSubmitting) {
+      return;
+    }
+
+    if (previewOnly) {
+      setSelectedEmoji(emoji);
+      setMessage('O widget dentro do painel é apenas demonstrativo.');
+      window.setTimeout(() => {
+        setMessage('');
+        setSelectedEmoji(null);
+      }, 2200);
       return;
     }
 
@@ -372,6 +384,12 @@ export default function CompactFeedback({
           </button>
         </div>
       )}
+
+      {previewOnly ? (
+        <p className="mb-4 text-center text-xs text-slate-500 dark:text-slate-400">
+          Pré-visualização do widget. As reações aqui não são registradas.
+        </p>
+      ) : null}
 
       <p className="mb-6 text-center text-[15px] text-slate-700 dark:text-slate-300">
         Como você avalia este conteúdo?

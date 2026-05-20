@@ -55,6 +55,21 @@ function sanitizeText(value, fallback = '') {
   return value.trim();
 }
 
+function isInternalPanelReaction(postUrl, postPath) {
+  if (!config.basePath) {
+    return false;
+  }
+
+  const normalizedPath = sanitizeText(postPath);
+  const normalizedUrl = sanitizeText(postUrl);
+
+  return (
+    normalizedPath === config.basePath ||
+    normalizedPath.startsWith(`${config.basePath}/`) ||
+    normalizedUrl.includes(`${config.basePath}`)
+  );
+}
+
 function enforceReactionRateLimit(req, res, next) {
   const ipAddress = getClientIp(req);
   const postPath = sanitizeText(req.body?.postPath);
@@ -103,6 +118,12 @@ function registerApiRoutes(app, prefix) {
 
     if (!postUrl || !postPath) {
       return res.status(400).json({ error: 'postUrl e postPath são obrigatórios.' });
+    }
+
+    if (isInternalPanelReaction(postUrl, postPath)) {
+      return res.status(400).json({
+        error: 'O painel do Kitty Chat não aceita reações próprias.',
+      });
     }
 
     insertReaction({

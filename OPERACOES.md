@@ -123,6 +123,8 @@ cd /home/adrock/kitty-chat
 npm run cleanup:test-data
 ```
 
+Esse comando também identifica reações indevidas registradas pelo próprio painel `/kitty-chat`.
+
 Remover de verdade:
 
 ```bash
