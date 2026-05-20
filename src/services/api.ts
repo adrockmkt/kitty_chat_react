@@ -51,6 +51,11 @@ export interface PostDetailResponse {
   timeline: TimelinePoint[];
 }
 
+export interface DateRangeFilters {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     credentials: 'include',
@@ -107,12 +112,36 @@ export async function getOverview() {
   return request<OverviewResponse>('/stats/overview');
 }
 
-export async function getPosts(search = '') {
-  const query = search ? `?search=${encodeURIComponent(search)}` : '';
-  return request<{ posts: PostStatsItem[] }>(`/stats/posts${query}`);
+export async function getOverviewWithFilters(filters: DateRangeFilters = {}) {
+  const searchParams = new URLSearchParams();
+  if (filters.dateFrom) {
+    searchParams.set('dateFrom', filters.dateFrom);
+  }
+  if (filters.dateTo) {
+    searchParams.set('dateTo', filters.dateTo);
+  }
+
+  const query = searchParams.toString();
+  return request<OverviewResponse>(`/stats/overview${query ? `?${query}` : ''}`);
 }
 
-export async function getPostDetail(params: { url?: string; path?: string }) {
+export async function getPosts(search = '', filters: DateRangeFilters = {}) {
+  const searchParams = new URLSearchParams();
+  if (search) {
+    searchParams.set('search', search);
+  }
+  if (filters.dateFrom) {
+    searchParams.set('dateFrom', filters.dateFrom);
+  }
+  if (filters.dateTo) {
+    searchParams.set('dateTo', filters.dateTo);
+  }
+
+  const query = searchParams.toString();
+  return request<{ posts: PostStatsItem[] }>(`/stats/posts${query ? `?${query}` : ''}`);
+}
+
+export async function getPostDetail(params: { url?: string; path?: string } & DateRangeFilters) {
   const searchParams = new URLSearchParams();
   if (params.url) {
     searchParams.set('url', params.url);
@@ -120,6 +149,57 @@ export async function getPostDetail(params: { url?: string; path?: string }) {
   if (params.path) {
     searchParams.set('path', params.path);
   }
+  if (params.dateFrom) {
+    searchParams.set('dateFrom', params.dateFrom);
+  }
+  if (params.dateTo) {
+    searchParams.set('dateTo', params.dateTo);
+  }
 
   return request<PostDetailResponse>(`/stats/post?${searchParams.toString()}`);
+}
+
+function escapeCsvValue(value: string | number | null | undefined) {
+  const normalized = String(value ?? '');
+  return `"${normalized.replaceAll('"', '""')}"`;
+}
+
+export function downloadPostsCsv(posts: PostStatsItem[], filename = 'kitty-chat-posts.csv') {
+  const header = [
+    'titulo',
+    'path',
+    'url',
+    'reacoes',
+    'sentimento_medio',
+    'positivas',
+    'neutras',
+    'negativas',
+    'ultima_reacao',
+  ];
+
+  const rows = posts.map((post) =>
+    [
+      post.postTitle,
+      post.postPath,
+      post.postUrl,
+      post.totalReactions,
+      post.averageSentiment.toFixed(2),
+      post.positiveReactions,
+      post.neutralReactions,
+      post.negativeReactions,
+      post.lastReactionAt,
+    ]
+      .map(escapeCsvValue)
+      .join(',')
+  );
+
+  const blob = new Blob([[header.join(','), ...rows].join('\n')], {
+    type: 'text/csv;charset=utf-8;',
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }

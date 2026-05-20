@@ -35,12 +35,14 @@ Itens removidos do fluxo principal:
 
 - login com usuário e senha
 - visão geral com total de reações, posts rastreados, sentimento médio e taxa positiva
+- filtro por período no painel
 - ranking por volume de reações
 - ranking de melhor sentimento, filtrando apenas posts positivos
 - ranking de pior sentimento, filtrando apenas posts negativos
 - detalhe por URL/post
 - timeline recente de reações
 - busca por URL, path ou título
+- exportação CSV da listagem principal
 
 ### Tema
 
@@ -203,6 +205,9 @@ npm run start
 npm run build
 npm run lint
 npm run preview
+npm run backup:db
+npm run cleanup:test-data
+npm run cleanup:test-data:apply
 ```
 
 ## Banco e Login Admin
@@ -217,6 +222,7 @@ npm run preview
 - sessão autenticada por cookie `httpOnly`
 - hash de IP para reduzir armazenamento sensível
 - cooldown básico por IP e por post no endpoint público de reações
+- limpeza automática de entradas antigas do rate limit em memória
 - CORS habilitado no endpoint público para permitir uso do widget embedado fora do painel
 
 ## Deploy
@@ -232,6 +238,13 @@ Em produção, o projeto roda assim:
 URL atual:
 
 - `https://mobiledelivery.com.br/kitty-chat/`
+
+## Operação e Manutenção
+
+- guia operacional: [OPERACOES.md](/Users/rafaellins/Documents/Projetos%20Ad%20Rockers/Ad%20Rockers/kitty_chat/OPERACOES.md)
+- backup manual: `npm run backup:db`
+- inspeção de dados de teste: `npm run cleanup:test-data`
+- remoção de dados de teste: `npm run cleanup:test-data:apply`
 
 ## Critérios de Aceite da Nova Versão
 

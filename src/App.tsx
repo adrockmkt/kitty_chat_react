@@ -8,6 +8,7 @@ import {
 } from 'react';
 import {
   BarChart3,
+  Download,
   Eye,
   LineChart,
   LogOut,
@@ -19,17 +20,37 @@ import CompactFeedback from './components/CompactFeedback';
 import logo from './assets/logo-sem-fundo.png';
 import { useTheme } from './hooks/useTheme';
 import {
-  getOverview,
+  downloadPostsCsv,
   getPostDetail,
   getPosts,
+  getOverviewWithFilters,
   getSession,
   login,
   logout,
+  type DateRangeFilters,
   type OverviewResponse,
   type PostDetailResponse,
   type PostStatsItem,
   type SessionUser,
 } from './services/api';
+
+type PeriodPreset = '7d' | '30d' | '90d' | 'all';
+
+function getDateRangeFromPreset(period: PeriodPreset): DateRangeFilters {
+  if (period === 'all') {
+    return {};
+  }
+
+  const now = new Date();
+  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+  const start = new Date(now);
+  start.setDate(now.getDate() - (days - 1));
+
+  return {
+    dateFrom: start.toISOString().slice(0, 10),
+    dateTo: now.toISOString().slice(0, 10),
+  };
+}
 
 function scoreTone(score: number) {
   if (score >= 1.2) {
@@ -216,12 +237,15 @@ function Dashboard({
   postDetail,
   selectedPostPath,
   search,
+  period,
   loading,
   error,
   onSearchChange,
+  onPeriodChange,
   onRefresh,
   onSelectPost,
   onLogout,
+  onExportCsv,
 }: {
   user: SessionUser;
   overview: OverviewResponse | null;
@@ -229,12 +253,15 @@ function Dashboard({
   postDetail: PostDetailResponse | null;
   selectedPostPath: string;
   search: string;
+  period: PeriodPreset;
   loading: boolean;
   error: string;
   onSearchChange: (value: string) => void;
+  onPeriodChange: (value: PeriodPreset) => void;
   onRefresh: () => Promise<void>;
   onSelectPost: (post: PostStatsItem) => void;
   onLogout: () => Promise<void>;
+  onExportCsv: () => void;
 }) {
   const selectedTone = useMemo(
     () => scoreTone(postDetail?.summary.averageSentiment ?? 0),
@@ -326,7 +353,7 @@ function Dashboard({
         <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)]">
           <div className="space-y-6">
             <div className="rounded-3xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_16px_30px_rgba(148,163,184,0.12)] dark:border-slate-700/70 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.96)_0%,rgba(15,23,42,0.96)_100%)] dark:shadow-none">
-              <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Visão por URL</h2>
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
@@ -334,12 +361,34 @@ function Dashboard({
                   </p>
                 </div>
 
-                <input
-                  value={search}
-                  onChange={(event) => onSearchChange(event.target.value)}
-                  placeholder="Buscar por URL, path ou título"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white lg:max-w-sm"
-                />
+                <div className="flex w-full flex-col gap-3 xl:w-auto xl:flex-row">
+                  <select
+                    value={period}
+                    onChange={(event) => onPeriodChange(event.target.value as PeriodPreset)}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  >
+                    <option value="7d">Últimos 7 dias</option>
+                    <option value="30d">Últimos 30 dias</option>
+                    <option value="90d">Últimos 90 dias</option>
+                    <option value="all">Todo o período</option>
+                  </select>
+
+                  <input
+                    value={search}
+                    onChange={(event) => onSearchChange(event.target.value)}
+                    placeholder="Buscar por URL, path ou título"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white xl:min-w-[320px]"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={onExportCsv}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-orange-300 hover:bg-orange-50 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:border-orange-400/40 dark:hover:bg-slate-900"
+                  >
+                    <Download size={16} />
+                    Exportar CSV
+                  </button>
+                </div>
               </div>
 
               {loading ? (
@@ -567,6 +616,7 @@ function App() {
   const [postDetail, setPostDetail] = useState<PostDetailResponse | null>(null);
   const [selectedPostPath, setSelectedPostPath] = useState('');
   const [search, setSearch] = useState('');
+  const [period, setPeriod] = useState<PeriodPreset>('30d');
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [dashboardError, setDashboardError] = useState('');
 
@@ -585,7 +635,7 @@ function App() {
     void bootstrapSession();
   }, []);
 
-  const refreshDashboard = useCallback(async (searchTerm = search) => {
+  const refreshDashboard = useCallback(async (searchTerm = search, selectedPeriod = period) => {
     if (!session) {
       return;
     }
@@ -594,7 +644,11 @@ function App() {
     setDashboardError('');
 
     try {
-      const [overviewData, postsData] = await Promise.all([getOverview(), getPosts(searchTerm)]);
+      const filters = getDateRangeFromPreset(selectedPeriod);
+      const [overviewData, postsData] = await Promise.all([
+        getOverviewWithFilters(filters),
+        getPosts(searchTerm, filters),
+      ]);
       setOverview(overviewData);
       setPosts(postsData.posts);
 
@@ -603,7 +657,7 @@ function App() {
 
       if (fallbackPost) {
         setSelectedPostPath(fallbackPost.postPath);
-        const detail = await getPostDetail({ path: fallbackPost.postPath });
+        const detail = await getPostDetail({ path: fallbackPost.postPath, ...filters });
         setPostDetail(detail);
       } else {
         setSelectedPostPath('');
@@ -616,7 +670,7 @@ function App() {
     } finally {
       setDashboardLoading(false);
     }
-  }, [search, selectedPostPath, session]);
+  }, [period, search, selectedPostPath, session]);
 
   useEffect(() => {
     if (!session) {
@@ -624,11 +678,11 @@ function App() {
     }
 
     const timer = window.setTimeout(() => {
-      void refreshDashboard(search);
+      void refreshDashboard(search, period);
     }, 250);
 
     return () => window.clearTimeout(timer);
-  }, [refreshDashboard, search, session]);
+  }, [period, refreshDashboard, search, session]);
 
   async function handleLogin(username: string, password: string) {
     setAuthLoading(true);
@@ -638,7 +692,7 @@ function App() {
       const response = await login(username, password);
       setSession(response.user);
       setSearch('');
-      await refreshDashboard('');
+      await refreshDashboard('', period);
     } catch (error) {
       const nextMessage =
         error instanceof Error ? error.message : 'Não foi possível fazer login.';
@@ -660,13 +714,17 @@ function App() {
   async function handleSelectPost(post: PostStatsItem) {
     setSelectedPostPath(post.postPath);
     try {
-      const detail = await getPostDetail({ path: post.postPath });
+      const detail = await getPostDetail({ path: post.postPath, ...getDateRangeFromPreset(period) });
       setPostDetail(detail);
     } catch (error) {
       const nextMessage =
         error instanceof Error ? error.message : 'Não foi possível carregar este post.';
       setDashboardError(nextMessage);
     }
+  }
+
+  function handleExportCsv() {
+    downloadPostsCsv(posts, `kitty-chat-posts-${period}.csv`);
   }
 
   if (authChecking) {
@@ -689,12 +747,15 @@ function App() {
       postDetail={postDetail}
       selectedPostPath={selectedPostPath}
       search={search}
+      period={period}
       loading={dashboardLoading}
       error={dashboardError}
       onSearchChange={setSearch}
+      onPeriodChange={setPeriod}
       onRefresh={() => refreshDashboard()}
       onSelectPost={handleSelectPost}
       onLogout={handleLogout}
+      onExportCsv={handleExportCsv}
     />
   );
 }

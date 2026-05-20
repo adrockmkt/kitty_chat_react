@@ -1,51 +1,31 @@
-# Comandos para Deploy no Servidor
+# Comandos de Deploy no Servidor
 
-## 1. Fazer build local
-```bash
-npm run build
-```
+O deploy atual do Kitty Chat não usa mais `serve`.
 
-## 2. Enviar arquivos para o servidor
-```bash
-rsync -avz dist/ root@147.182.183.10:/home/adrock/kitty-chat/dist/
-```
+Hoje o fluxo correto é:
 
-## 3. Conectar no servidor
-```bash
-ssh root@147.182.183.10
-```
+1. `git pull`
+2. `npm install`
+3. `npm run build`
+4. `pm2 restart kitty-chat --update-env`
 
-## 4. Navegar para o diretório
+Comandos:
+
 ```bash
 cd /home/adrock/kitty-chat
+git pull
+npm install
+npm run build
+pm2 restart kitty-chat --update-env
 ```
 
-## 5. Instalar serve se não estiver instalado
+Validação:
+
 ```bash
-npm install -g serve
+curl https://mobiledelivery.com.br/kitty-chat/api/health
+pm2 status
 ```
 
-## 6. Iniciar o servidor (em background)
-```bash
-nohup serve -s dist -l 3000 -H 0.0.0.0 > server.log 2>&1 &
-```
+Para operação completa, consulte:
 
-## 7. Verificar se está rodando
-```bash
-ps aux | grep serve
-curl http://localhost:3000
-```
-
-## 8. Para parar o servidor (se necessário)
-```bash
-pkill -f "serve -s dist"
-```
-
-## 9. Para ver os logs
-```bash
-tail -f server.log
-```
-
-## URLs de acesso após deploy:
-- http://147.182.183.10:3000
-- http://mobiledelivery.com.br:3000
+- [OPERACOES.md](/Users/rafaellins/Documents/Projetos%20Ad%20Rockers/Ad%20Rockers/kitty_chat/OPERACOES.md)

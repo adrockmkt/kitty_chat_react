@@ -124,24 +124,45 @@ export function hashIpAddress(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
-function buildPostsWhereClause(searchTerm) {
+function appendDateRangeFilters(filters, params, dateFrom, dateTo) {
+  if (dateFrom) {
+    filters.push('date(created_at) >= date(@dateFrom)');
+    params.dateFrom = dateFrom;
+  }
+
+  if (dateTo) {
+    filters.push('date(created_at) <= date(@dateTo)');
+    params.dateTo = dateTo;
+  }
+}
+
+function buildPostsWhereClause(searchTerm, options = {}) {
+  const filters = [];
+  const params = {};
+
   if (!searchTerm) {
+    appendDateRangeFilters(filters, params, options.dateFrom, options.dateTo);
+
     return {
-      clause: '',
-      params: {},
+      clause: filters.length > 0 ? `WHERE ${filters.join('\n        AND ')}` : '',
+      params,
     };
   }
 
-  return {
-    clause: `
-      WHERE post_url LIKE @search
+  filters.push(`
+      (
+        post_url LIKE @search
         OR post_path LIKE @search
         OR COALESCE(post_title, '') LIKE @search
         OR COALESCE(post_id, '') LIKE @search
-    `,
-    params: {
-      search: `%${searchTerm}%`,
-    },
+      )
+    `);
+  params.search = `%${searchTerm}%`;
+  appendDateRangeFilters(filters, params, options.dateFrom, options.dateTo);
+
+  return {
+    clause: `WHERE ${filters.join('\n        AND ')}`,
+    params,
   };
 }
 
@@ -165,7 +186,12 @@ function mapPostRow(row) {
   };
 }
 
-export function getOverviewStats() {
+export function getOverviewStats(options = {}) {
+  const summaryFilters = [];
+  const summaryParams = {};
+  appendDateRangeFilters(summaryFilters, summaryParams, options.dateFrom, options.dateTo);
+  const summaryWhere = summaryFilters.length > 0 ? `WHERE ${summaryFilters.join(' AND ')}` : '';
+
   const summary = db
     .prepare(`
       SELECT
@@ -174,8 +200,14 @@ export function getOverviewStats() {
         ROUND(AVG(sentiment_score), 2) AS average_sentiment,
         ROUND(AVG(CASE WHEN sentiment_score > 0 THEN 1.0 ELSE 0 END) * 100, 1) AS positive_rate
       FROM reactions
+      ${summaryWhere}
     `)
-    .get();
+    .get(summaryParams);
+
+  const emojiFilters = [];
+  const emojiParams = {};
+  appendDateRangeFilters(emojiFilters, emojiParams, options.dateFrom, options.dateTo);
+  const emojiWhere = emojiFilters.length > 0 ? `WHERE ${emojiFilters.join(' AND ')}` : '';
 
   const emojiBreakdown = db
     .prepare(`
@@ -184,12 +216,26 @@ export function getOverviewStats() {
         emotion_label,
         sentiment_score,
         COUNT(*) AS count,
-        ROUND(COUNT(*) * 100.0 / NULLIF((SELECT COUNT(*) FROM reactions), 0), 1) AS percentage
+        ROUND(
+          COUNT(*) * 100.0 /
+          NULLIF((SELECT COUNT(*) FROM reactions ${emojiWhere}), 0),
+          1
+        ) AS percentage
       FROM reactions
+      ${emojiWhere}
       GROUP BY emoji, emotion_label, sentiment_score
       ORDER BY sentiment_score ASC
     `)
-    .all();
+    .all(emojiParams);
+
+  const timelineFilters = [];
+  const timelineParams = {};
+  appendDateRangeFilters(timelineFilters, timelineParams, options.dateFrom, options.dateTo);
+  if (!options.dateFrom && !options.dateTo) {
+    timelineFilters.push("created_at >= datetime('now', '-30 days')");
+  }
+  const timelineWhere =
+    timelineFilters.length > 0 ? `WHERE ${timelineFilters.join(' AND ')}` : '';
 
   const timeline = db
     .prepare(`
@@ -198,11 +244,17 @@ export function getOverviewStats() {
         COUNT(*) AS count,
         ROUND(AVG(sentiment_score), 2) AS average_sentiment
       FROM reactions
-      WHERE created_at >= datetime('now', '-30 days')
+      ${timelineWhere}
       GROUP BY date(created_at)
       ORDER BY day ASC
     `)
-    .all();
+    .all(timelineParams);
+
+  const aggregateFilters = [];
+  const aggregateParams = {};
+  appendDateRangeFilters(aggregateFilters, aggregateParams, options.dateFrom, options.dateTo);
+  const aggregateWhere =
+    aggregateFilters.length > 0 ? `WHERE ${aggregateFilters.join(' AND ')}` : '';
 
   const aggregatedPosts = db
     .prepare(`
@@ -218,9 +270,10 @@ export function getOverviewStats() {
         SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END) AS negative_reactions,
         MAX(created_at) AS last_reaction_at
       FROM reactions
+      ${aggregateWhere}
       GROUP BY post_path
     `)
-    .all()
+    .all(aggregateParams)
     .map(mapPostRow);
 
   const topPosts = [...aggregatedPosts]
@@ -274,8 +327,8 @@ export function getOverviewStats() {
   };
 }
 
-export function getPostsStats(searchTerm = '') {
-  const { clause, params } = buildPostsWhereClause(searchTerm);
+export function getPostsStats(searchTerm = '', options = {}) {
+  const { clause, params } = buildPostsWhereClause(searchTerm, options);
 
   return db
     .prepare(`
@@ -300,19 +353,22 @@ export function getPostsStats(searchTerm = '') {
     .map(mapPostRow);
 }
 
-export function getPostStats({ postUrl, postPath }) {
-  let whereClause = '';
-  let params = {};
+export function getPostStats({ postUrl, postPath, dateFrom, dateTo }) {
+  const filters = [];
+  const params = {};
 
   if (postUrl) {
-    whereClause = 'WHERE post_url = @postUrl';
-    params = { postUrl };
+    filters.push('post_url = @postUrl');
+    params.postUrl = postUrl;
   } else if (postPath) {
-    whereClause = 'WHERE post_path = @postPath';
-    params = { postPath };
+    filters.push('post_path = @postPath');
+    params.postPath = postPath;
   } else {
     return null;
   }
+
+  appendDateRangeFilters(filters, params, dateFrom, dateTo);
+  const whereClause = `WHERE ${filters.join(' AND ')}`;
 
   const summary = db
     .prepare(`
@@ -380,4 +436,20 @@ export function getPostStats({ postUrl, postPath }) {
       averageSentiment: Number(row.average_sentiment ?? 0),
     })),
   };
+}
+
+export function removeTestReactions() {
+  const deleteStatement = db.prepare(`
+    DELETE FROM reactions
+    WHERE
+      post_path IN ('srcdoc', 'about:srcdoc')
+      OR post_url LIKE 'about:srcdoc%'
+      OR post_title = 'srcdoc'
+      OR post_url LIKE 'http://localhost:%'
+      OR post_url LIKE 'https://localhost:%'
+      OR post_url LIKE 'http://127.0.0.1:%'
+      OR post_url LIKE 'https://127.0.0.1:%'
+  `);
+
+  return deleteStatement.run();
 }

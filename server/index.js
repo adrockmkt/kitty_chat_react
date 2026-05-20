@@ -27,6 +27,11 @@ import { reactionMap } from './reactions.js';
 
 const reactionCooldown = new Map();
 
+function normalizeDateParam(value) {
+  const sanitized = sanitizeText(value);
+  return /^\d{4}-\d{2}-\d{2}$/.test(sanitized) ? sanitized : '';
+}
+
 function applyPublicCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -55,6 +60,12 @@ function enforceReactionRateLimit(req, res, next) {
   const postPath = sanitizeText(req.body?.postPath);
   const fingerprint = `${hashIpAddress(ipAddress) ?? 'anonymous'}:${postPath}`;
   const lastSeen = reactionCooldown.get(fingerprint);
+
+  for (const [key, timestamp] of reactionCooldown.entries()) {
+    if (Date.now() - timestamp > config.rateLimitWindowMs * 2) {
+      reactionCooldown.delete(key);
+    }
+  }
 
   if (lastSeen && Date.now() - lastSeen < config.rateLimitWindowMs) {
     applyPublicCors(res);
@@ -164,20 +175,26 @@ function registerApiRoutes(app, prefix) {
   });
 
   app.get(`${prefix}/stats/overview`, requireAuth, (_req, res) => {
-    res.json(getOverviewStats());
+    const dateFrom = normalizeDateParam(_req.query?.dateFrom);
+    const dateTo = normalizeDateParam(_req.query?.dateTo);
+    res.json(getOverviewStats({ dateFrom, dateTo }));
   });
 
   app.get(`${prefix}/stats/posts`, requireAuth, (req, res) => {
     const search = sanitizeText(req.query?.search);
+    const dateFrom = normalizeDateParam(req.query?.dateFrom);
+    const dateTo = normalizeDateParam(req.query?.dateTo);
     res.json({
-      posts: getPostsStats(search),
+      posts: getPostsStats(search, { dateFrom, dateTo }),
     });
   });
 
   app.get(`${prefix}/stats/post`, requireAuth, (req, res) => {
     const postUrl = sanitizeText(req.query?.url);
     const postPath = sanitizeText(req.query?.path);
-    const details = getPostStats({ postUrl, postPath });
+    const dateFrom = normalizeDateParam(req.query?.dateFrom);
+    const dateTo = normalizeDateParam(req.query?.dateTo);
+    const details = getPostStats({ postUrl, postPath, dateFrom, dateTo });
 
     if (!details) {
       return res.status(404).json({ error: 'Post não encontrado.' });

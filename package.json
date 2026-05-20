@@ -9,7 +9,10 @@
     "start": "node server/index.js",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backup:db": "node scripts/backup-sqlite.js",
+    "cleanup:test-data": "node scripts/cleanup-test-data.js",
+    "cleanup:test-data:apply": "node scripts/cleanup-test-data.js --apply"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
